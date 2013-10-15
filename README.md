@@ -4,7 +4,7 @@ Clyde is a lamp with a lot of personality that you can adapt, play with, and tru
 
 For more information, see the website at: http://www.fabule.com
 
-To report a bug in the software, go to:
+To report a bug in the hardware or software, go to:
 http://github.com/fabule/Clyde/issues
 
 Credits
