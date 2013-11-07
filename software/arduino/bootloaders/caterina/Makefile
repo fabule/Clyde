@@ -390,10 +390,11 @@ AVRDUDE_PORT = usb
 #AVRDUDE_VERBOSE = -v -v
 
 # Fuses and lock bits to set before and after programming the flash.
-AVRDUDE_PRE_FLAGS = -U lock:w:0x3f:m
+AVRDUDE_PRE_FLAGS = -U lock:w:0x3f:m -e -B1
 AVRDUDE_POST_FLAGS = -U lfuse:w:0xff:m -U hfuse:w:0xd8:m -U efuse:w:0xcb:m -U lock:w:0x2f:m
+AVRDUDE_MCU = m32u4
 
-AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS = -p $(AVRDUDE_MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
