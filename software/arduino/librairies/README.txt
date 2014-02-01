@@ -1,6 +1,9 @@
 ﻿Librairies
 ==========
+The Clyde library uses modified code from https://github.com/jrowberg/i2cdevlib to its I2C communication.
 
-ArduinoUnit...
-
-I2Cdev... when we use the fork instead of copying the files.
+You do not need to install separate libraries to compile Clyde's firmware. The library only uses the "Wire" and "EEPROM" libraries, which are both part of the Arduino core. This is why you will find the following includes at the top of the "ClydeFirmware" sketch.
+```
+#include <Wire.h>
+#include <EEPROM.h>
+```
