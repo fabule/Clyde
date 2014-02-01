@@ -29,9 +29,6 @@
 #
 # make extcoff = Convert ELF to AVR Extended COFF.
 #
-# make program_new = Download an hex file to a new device, using avr dude.
-#                    Please customize the avrdude settings below first!
-#
 # make program = Download an hex file to the device, using avrdude.
 #                Please customize the avrdude settings below first!
 #
@@ -393,8 +390,7 @@ AVRDUDE_PORT = usb
 #AVRDUDE_VERBOSE = -v -v
 
 # Fuses and lock bits to set before and after programming the flash.
-AVRDUDE_PRE_FLAGS_NEW = -U lock:w:0x3f:m -e -B2 
-AVRDUDE_PRE_FLAGS = -U lock:w:0x3f:m -e -B1
+AVRDUDE_PRE_FLAGS = -U lock:w:0x3f:m
 AVRDUDE_POST_FLAGS = -U lfuse:w:0xff:m -U hfuse:w:0xd8:m -U efuse:w:0xcb:m -U lock:w:0x2f:m
 AVRDUDE_MCU = m32u4
 
@@ -556,27 +552,17 @@ gccversion :
 
 
 # Program the device.
-program_new:
-	@echo First pass: slow \(bitclock=10ms\)
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_PRE_FLAGS_NEW)
-	@sleep 1
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$(TARGET)-Clyde.hex
-	@sleep 1
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_POST_FLAGS)
-	@sleep 1
-	@echo Second pass: fast \(bitclock=1ms\)
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_PRE_FLAGS)
-	@sleep 1
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$(TARGET)-Clyde.hex
-	@sleep 1
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_POST_FLAGS)
-
 program:
+ifeq ($(ID), clyde)
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_PRE_FLAGS)
 	@sleep 1
 	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$(TARGET)-Clyde.hex
 	@sleep 1
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_POST_FLAGS)
+else
+	@echo You must specify the ID of the board to program \(e.g. ID=clyde\).
+endif
+
 
 # Generate avr-gdb config/init file which does the following:
 #     define the reset signal, load the target file, connect to target, and set
