@@ -1,4 +1,4 @@
-Clyde
+﻿Clyde
 ======
 Clyde is a lamp with a lot of personality that you can adapt, play with, and truly call your own. Clyde is open source and Arduino-compatible.  You can change how Clyde reacts to his environment by inserting personality modules on his main controller board. You can also change how Clyde behaves by reprogramming his firmware using the standard Arduino IDE.
 
@@ -12,7 +12,7 @@ Installation
 
 The Clyde firmware is divided into three parts: bootloader, library, and sketch.
 
-You can find the Clyde library in /software/arduino/librairies/. Place the "clyde" library folder inside your Arduino "librairies" folder. This contains the majority of the code that controls Clyde. If you are not sure about how to install an Arduino library, you can find instructions here: http://arduino.cc/en/Guide/Libraries
+You can find the Clyde library in /software/arduino/libraries/. Place the "clyde" library folder inside your Arduino "librairies" folder. This contains the majority of the code that controls Clyde. If you are not sure about how to install an Arduino library, you can find instructions here: http://arduino.cc/en/Guide/Libraries
 
 When the library is in place, you can look for the sketch in /software/arduino/firmwares/. Place the "ClydeFirmware" sketch folder inside your Arduino "sketches" folder. This sketch does not contain much, but it is a good place to start playing with Clyde's behaviors.
 

@@ -1,4 +1,4 @@
-﻿Librairies
+﻿Libraries
 ==========
 The Clyde library uses modified code from https://github.com/jrowberg/i2cdevlib to its I2C communication.
 
