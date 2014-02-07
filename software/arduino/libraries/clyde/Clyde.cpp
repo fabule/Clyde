@@ -591,6 +591,14 @@ void CClyde::updateCycleNextStep(uint32_t now) {
   m_cycle.stepColor = RGB(m_ambient.color.r, m_ambient.color.g, m_ambient.color.b);
 }
 
+void CClyde::setCycleStep(uint8_t step) {
+  if (step >= m_cycle.numSteps) return;
+  
+  m_cycle.step = step;
+  m_cycle.stepStart = millis();
+  m_cycle.stepEnd += m_cycle.intervals[m_cycle.step];
+}
+
 void CClyde::cycleNextStep(uint32_t now) {
   m_cycle.stepEnd = now;
   updateCycleNextStep(now);

@@ -23,14 +23,14 @@ const RGB CClydeTouchyFeely::SELECT_COLORS[] = {RGB(0,0,0), RGB(255,0,0), RGB(25
 const uint16_t CClydeTouchyFeely::SELECT_INTERVALS[] = {100, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
   
 CClydeTouchyFeely::CClydeTouchyFeely()
-  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR), m_tickleCount(0), m_firstTickle(0) {
+  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR), m_tickleCount(0), m_firstTickle(0), m_lastStopStep(0) {
 }
 
 bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
   if (!m_mpr121.testConnection())
     return false;
   
-  m_mpr121.initialize();
+  m_mpr121.initialize(true);
  
   pinMode(dpin, INPUT);
   digitalWrite(dpin, HIGH); //TODO check if module detection messes
@@ -76,6 +76,13 @@ void CClydeTouchyFeely::tickleCheck() {
       laugh();
       m_firstTickle = 0;
     }
+    #ifdef CLYDE_DEBUG
+    else {
+      Serial.print("Clyde: touchy-feely module detected ");
+      Serial.print(m_tickleCount);
+      Serial.println(" tickle(s)");
+    }
+    #endif
   }
   //if it's been too long, reset tickle count
   else {
@@ -87,6 +94,10 @@ void CClydeTouchyFeely::laugh() {
   //we need at least three cycle steps to store tickle
   if (CClyde::CAmbientCycle::MAX_CYCLE_LENGTH < 2) return;
 
+  #ifdef CLYDE_DEBUG
+  Serial.println("Clyde: laughs");
+  #endif
+  
   //generate random tickle cycle
   //TODO move values somewhere easier to find and change
   uint8_t laughSteps = random(CClyde::CAmbientCycle::MAX_CYCLE_LENGTH/4,
@@ -119,9 +130,13 @@ void CClydeTouchyFeely::laugh() {
 }
 
 void CClydeTouchyFeely::startColorSelect() {
+  #ifdef CLYDE_DEBUG
+  Serial.println("Clyde: touchy-feely color selection cycle STARTED");
+  #endif
+
   //if the current cycle was already the color selection cycle, then continue
   //TODO double check this, not quite sure...
-  if (Clyde.cycle()->is(SELECT)) {
+  /*if (Clyde.cycle()->is(SELECT)) {
     RGBf ambientColor = Clyde.ambient()->color;
     Clyde.cycle()->stepColor = RGB(ambientColor.r, ambientColor.g, ambientColor.b);
     Clyde.cycleNextStep(millis());
@@ -129,10 +144,20 @@ void CClydeTouchyFeely::startColorSelect() {
   //set the new color select cycle
   else {
     Clyde.setCycle(SELECT, SELECT_STEPS, SELECT_COLORS, SELECT_INTERVALS, LOOP);
-  }
+  }*/
+  
+  Clyde.setCycle(SELECT, SELECT_STEPS, SELECT_COLORS, SELECT_INTERVALS, LOOP);
+  Clyde.setCycleStep(m_lastStopStep);
 }
 
 void CClydeTouchyFeely::stopColorSelect() {
+  #ifdef CLYDE_DEBUG
+  Serial.println("Clyde: touchy-feely color selection cycle STOPPED");
+  #endif
+  
+  //save step to restart at the same place
+  m_lastStopStep = Clyde.cycle()->step;
+  
   Clyde.cycle()->off();
   Clyde.ambient()->save();
 }

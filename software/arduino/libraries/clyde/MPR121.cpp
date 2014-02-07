@@ -45,7 +45,7 @@ MPR121::MPR121(uint8_t address) :
   }
 }
 
-void MPR121::initialize()
+void MPR121::initialize(bool autoconfig)
 {
   // These are the configuration values recommended by app note AN3944
   // along with the description in the app note.
@@ -152,11 +152,13 @@ void MPR121::initialize()
   // Variation:
   //   In most cases these values will never need to be changed, but if
   //   a case arises, a full description is found in application note AN3889.
-  //I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_CONTROL_0,    0x0B);
-  //I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_USL,          0x9C);
-  //I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_LSL,          0x65);
-  //I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_TARGET_LEVEL, 0x8C);
-
+  if (autoconfig) {
+    I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_CONTROL_0,    0x0B);
+    I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_USL,          0x9C);
+    I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_LSL,          0x65);
+    I2Cdev::writeByte(m_devAddr, AUTO_CONFIG_TARGET_LEVEL, 0x8C);
+  }
+  
   // Section F
   // Description:
   //   This register controls the number of electrodes being enabled

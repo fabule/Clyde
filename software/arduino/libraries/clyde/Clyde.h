@@ -249,6 +249,11 @@ public:
   void setCycle(ECycleType type, uint8_t steps, const RGB *colors, const uint32_t *intervals, ECycleLoop loop);
 
   /**
+   * Move the cycle to a given step.
+   */
+  void setCycleStep(uint8_t step);
+  
+  /**
    * Skip to the next cycle step.
    */
   void cycleNextStep(uint32_t now);

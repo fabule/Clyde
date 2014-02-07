@@ -179,7 +179,6 @@ THE SOFTWARE.
 #define AUTO_CONFIG_TARGET_LEVEL 0x7F
 
 // Other Constants
-// these are suggested values from app note 3944
 #define TOUCH_THRESHOLD   0x0F
 #define RELEASE_THRESHOLD 0x0A
 #define NUM_CHANNELS      12
@@ -200,7 +199,7 @@ class MPR121
     MPR121(uint8_t address = MPR121_DEFAULT_ADDRESS);
 
     // write the configuration registers in accordance with the datasheet and app note 3944
-    void initialize();
+    void initialize(bool autoconfig = false);
     
     // returns true if the device is responding on the I2C bus
     bool testConnection();
