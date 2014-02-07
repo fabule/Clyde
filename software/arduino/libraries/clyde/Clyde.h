@@ -24,7 +24,7 @@
 #include "ClydeModule.h"
 
 //not implemented yet
-//#define CLYDE_DEBUG
+#define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.
@@ -114,7 +114,11 @@ public:
     static const uint8_t CALIB_SAMPLE_INTERVAL = 10;    /**< Time between calibration samples in millis. */
     static const uint8_t CALIB_MAX_CHANGE = 40;         /**< Maximum value range accepted for calibration. */
     static const uint8_t CALIB_NUM_REPEATS = 125;       /**< Numbers of samples to check for calibration. */
-    static const uint16_t CALIB_MIN_THRESHOLD = 500;    /**< Minimum calibration threshold. Anything below means too much noise. */
+    static const uint16_t CALIB_IR_BASE = 610;          /**< Base IR reading without any IR from outside. */
+    static const float CALIB_FORMULA_A = 0.5;           /**< Multiplier for calibration formula. */
+    static const uint16_t CALIB_FORMULA_B = 450;        /**< Base for calibration formula. */
+    static const uint16_t CALIB_MIN_THRESHOLD_DIFF = 50; /**< Minimum difference between base and threshold. */    
+    static const uint16_t CALIB_MAX_IR = 100;           /**< Maximum IR needed for calibration. Anything more means too much noise/sun. */
     static const uint8_t PRESS_COUNT_THRESHOLD = 8;     /**< Number of press detection needed to trigger a press event. */
     
     uint8_t pin;              /**< Analog signal pin of the IR sensor. */
@@ -122,6 +126,7 @@ public:
     bool calibrated;          /**< Flag to track if the eye is currently calibrated. */
     bool calibBlink;          /**< Blink status during the first calibration. On/Off. */
     uint32_t nextCalibBlink;  /**< Next time to change the first calibration blink status in millis. */
+    uint32_t calibLock;       /**< Time until when the calibration can't not happen. */
     uint8_t calibCount;       /**< Number of time we read a calibration value within range in a row. */
     uint16_t irMin;           /**< Minimum sensor value read. */
     uint16_t irMax;           /**< Maximum sensor value read. */
@@ -130,6 +135,7 @@ public:
     uint32_t pressedLast;     /**< Time when we last detected a pressed state. */
     uint32_t pressedStart;    /**< Time when we detected the start of a press. */
     uint8_t pressedCount;     /**< Number of time we detected a pressed state consecutively. */
+    uint32_t pressLock;       /**< Time until when pressed events can not trigger. */
   };
   
   /**

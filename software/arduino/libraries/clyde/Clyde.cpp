@@ -64,6 +64,7 @@ CClyde::CClyde() {
   m_eye.calibrated = false;
   m_eye.calibBlink = true;
   m_eye.nextCalibBlink = 3000;
+  m_eye.calibLock = 0;
   m_eye.calibCount = 0;
   m_eye.irMin = 1025;
   m_eye.irMax = 0;
@@ -72,6 +73,7 @@ CClyde::CClyde() {
   m_eye.pressedLast = 0;
   m_eye.pressedStart = 0;
   m_eye.pressedCount = 0;
+  m_eye.pressLock = 0;
   
   //init ambient cycle
   m_cycle.type = OFF;
@@ -86,8 +88,8 @@ CClyde::CClyde() {
 }
 
 void CClyde::begin() {
-#if CLYDE_TESTS
-    while (!Serial);
+#ifdef CLYDE_DEBUG
+  while (!Serial);
 #endif
 
   //setup module pins
@@ -117,10 +119,6 @@ void CClyde::begin() {
 }
 
 void CClyde::update() {
-#if CLYDE_TESTS
-  Test::run();
-#endif
-
   updateEye();
   updateAmbientLight();
   updateWhiteLight();
@@ -139,6 +137,12 @@ void CClyde::updateEye() {
 
   //if the eye was pressed
   if (wasEyePressed(irValue)) {
+    #ifdef CLYDE_DEBUG
+      Serial.print("Clyde: eye was pressed.");
+      if (m_cycle.isOn()) Serial.println(" stopped cycle.");
+      else Serial.println(" switched lights. ");
+    #endif  
+
     //and the ambient cycle is on, then turn it off
     if (m_cycle.isOn()) 
       stopCycle();
@@ -149,6 +153,13 @@ void CClyde::updateEye() {
 }
 
 void CClyde::calibrateEye(uint16_t irValue) {
+  #ifdef CLYDE_DEBUG
+    static int restartCount = 0;
+  #endif
+  
+  //check if calibration was locked
+  if (millis() < m_eye.calibLock) return;
+  
   //if IR has never been calibrated, blink white light until it is
   if(!m_eye.onceCalibrated) {
     if (millis() > m_eye.nextCalibBlink) {
@@ -157,6 +168,9 @@ void CClyde::calibrateEye(uint16_t irValue) {
       m_eye.nextCalibBlink += m_eye.calibBlink ? CEye::CALIB_BLINK_DURATION : CEye::CALIB_BLINK_INTERVAL;
     }
   }
+  
+  //if the eye is pressed, don't try to calibrate
+  if (m_eye.pressedCount > 0) return;
   
   //get difference since last time
   int32_t irDiff = irValue > m_eye.irLast ? irValue - m_eye.irLast : m_eye.irLast - irValue;
@@ -171,6 +185,10 @@ void CClyde::calibrateEye(uint16_t irValue) {
   else {
     m_eye.calibCount = 0;
     m_eye.irMin = m_eye.irMax = irValue;
+    
+    #ifdef CLYDE_DEBUG
+      restartCount++;
+    #endif
   }
 
   //check if we've read enough samples to calibrate
@@ -183,20 +201,48 @@ void CClyde::calibrateEye(uint16_t irValue) {
       return;
     }
     
-    //calculate the new threshold
-    uint16_t newThreshold;
-    newThreshold = (m_eye.irMin + m_eye.irMax) / 2;
-    newThreshold = newThreshold * 0.5 + 450;
-
+    //average ir reading
+    uint16_t irAvg = (m_eye.irMin + m_eye.irMax) / 2;
+    
+    //check to make sure that there's enough IR emitted by the circuit
+    if (irAvg > (uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A)) {
+      blink(RGB(255, 0, 0), 3, 200);
+      setWhite(255);
+      m_eye.calibrated = false;
+      
+      #ifdef CLYDE_DEBUG
+      Serial.print("Clyde: eye uncalibrated. not enough IR detected, check circuit. ir = ");
+      Serial.print(irAvg);
+      Serial.print(", minimum = ");
+      Serial.println((uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A));
+      #endif
+    }
     //only calibrate if the threshold is above a certain limit
     //if not it's too unpredictable (e.g. the sun is shining on it)
-    if (newThreshold > CEye::CALIB_MIN_THRESHOLD) {
+    else if (irAvg > CEye::CALIB_MAX_IR) {
       //if the eye was not calibrated, turn on ambient light to show feedback
       if (!m_eye.calibrated)
         fadeAmbient(m_ambient.savedColor, 0.1f);
 
       m_eye.calibrated = true;
       m_eye.onceCalibrated = true;
+
+      //calculate the threshold
+      //simple convertion from detected base ir to threshold
+      //the less ir detected (higher value) the less difference required to trigger
+      uint16_t newThreshold = irAvg * CEye::CALIB_FORMULA_A + CEye::CALIB_FORMULA_B;
+
+      #ifdef CLYDE_DEBUG
+        if (m_eye.irThreshold != newThreshold) {
+          Serial.print("Clyde: eye calibrated. threshold = ");
+          Serial.print(m_eye.irThreshold);
+          Serial.print(", range = ");
+          Serial.print(m_eye.irMax - m_eye.irMin);
+          Serial.print(", noisy restarts = ");
+          Serial.println(restartCount);
+        }
+        restartCount = 0;
+      #endif      
       
       m_eye.irThreshold = newThreshold;
     }
@@ -206,6 +252,10 @@ void CClyde::calibrateEye(uint16_t irValue) {
       blink(RGB(255, 0, 0), 3, 200);
       setWhite(255);
       m_eye.calibrated = false;
+      
+      #ifdef CLYDE_DEBUG
+      Serial.println("Clyde: eye uncalibrated. too much infrared noise");
+      #endif
     }
 
     //reset values
@@ -219,7 +269,7 @@ void CClyde::calibrateEye(uint16_t irValue) {
 
 bool CClyde::wasEyePressed(uint16_t irValue) {
   //require that IR is calibrated
-  if (!m_eye.calibrated) return false;
+  if (!m_eye.calibrated || millis() < m_eye.pressLock) return false;
 
   //if the eye press is detected enough time, trigger press event
   if (m_eye.pressedCount == CEye::PRESS_COUNT_THRESHOLD) {
@@ -230,8 +280,13 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
       //if the eye has been pressed for a some time, auto release
       if (millis() > m_eye.pressedStart+3000) {
         m_eye.pressedCount = 0;
+        m_eye.calibLock = m_eye.pressLock = millis() + 1500;
         blink(RGB(255,0,0), 3, 200);
         setWhite(255);
+        
+        #ifdef CLYDE_DEBUG
+        Serial.println("Clyde: eye long press detected. auto release.");
+        #endif
       }
     }
     //if it's not pressed, and it's been a bit of time, then release
@@ -483,7 +538,7 @@ void CClyde::blink(const RGB& rgb, uint8_t numBlinks, uint8_t msInterval) {
     intervals[i] = msInterval;
   }
   
-  setCycle(BLINK, steps, &colors[0], &intervals[0], LOOP);
+  setCycle(BLINK, steps, &colors[0], &intervals[0], NO_LOOP);
 }
 
 void CClyde::updateCycle() {
