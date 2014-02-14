@@ -219,7 +219,7 @@ void CClyde::calibrateEye(uint16_t irValue) {
     }
     //only calibrate if the threshold is above a certain limit
     //if not it's too unpredictable (e.g. the sun is shining on it)
-    else if (irAvg > CEye::CALIB_MAX_IR) {
+    else {
       //if the eye was not calibrated, turn on ambient light to show feedback
       if (!m_eye.calibrated)
         fadeAmbient(m_ambient.savedColor, 0.1f);
@@ -245,17 +245,6 @@ void CClyde::calibrateEye(uint16_t irValue) {
       #endif      
       
       m_eye.irThreshold = newThreshold;
-    }
-    //check if we calibrated with a lot of IR noise
-    //if so, turn off lights in case the eye stopped working
-    else if (m_eye.calibrated) {
-      blink(RGB(255, 0, 0), 3, 200);
-      setWhite(255);
-      m_eye.calibrated = false;
-      
-      #ifdef CLYDE_DEBUG
-      Serial.println("Clyde: eye uncalibrated. too much infrared noise");
-      #endif
     }
 
     //reset values
