@@ -173,16 +173,6 @@ void CClyde::detectPersonalities() {
   }
 }
 
-void CClyde::update() {
-  updateEye();
-  updateAmbientLight();
-  updateWhiteLight();
-  
-  if (!m_eye.onceCalibrated) return;
-  
-  updatePersonalities();
-}
-
 void CClyde::updateEye() {
   //read IR value
   uint16_t irValue = analogRead(m_eye.pin);

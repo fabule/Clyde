@@ -10,6 +10,14 @@ void setup() {
 }
 
 void loop() {
-  //TODO break this update down here to be easier to modify
-  Clyde.update();
+  //calibrate the eye and check for press
+  Clyde.updateEye();
+  
+  //update the lights
+  Clyde.updateAmbientLight();
+  Clyde.updateWhiteLight();
+  
+  //make Clyde behave after the eye was calibrated once
+  if (Clyde.wasEyeCalibratedOnce())
+    Clyde.updatePersonalities();
 }

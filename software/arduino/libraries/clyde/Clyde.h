@@ -24,7 +24,7 @@
 #include "ClydeModule.h"
 
 //not implemented yet
-#define CLYDE_DEBUG
+//#define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.
@@ -180,8 +180,20 @@ public:
   /** Initialize Clyde. */
   void begin();
   
-  /** Update Clyde each loop. */
-  void update();
+  /** Check if eye was calibrated once. */
+  bool wasEyeCalibratedOnce() { return m_eye.onceCalibrated; }
+
+  /** Update the eye. */
+  void updateEye();
+  
+  /** Update the ambient light. */
+  void updateAmbientLight();
+
+  /** Update the white light. */
+  void updateWhiteLight();
+
+  /** Update the personality modules. */
+  void updatePersonalities();
   
   /**
    * Get a module position for a given index.
@@ -271,12 +283,6 @@ private:
   /** Detect the personality modules. */
   void detectPersonalities();
 
-  /** Update the personality modules. */
-  void updatePersonalities();  
-
-  /** Update the eye. */
-  void updateEye();
-
   /**
    * Calibrate the eye.
    */
@@ -286,19 +292,13 @@ private:
    * Check if the eye was pressed given a read sensor value.
    */
   bool wasEyePressed(uint16_t irValue);
-
-  /** Update the ambient light. */
-  void updateAmbientLight();
   
   /** Update a color channel of the ambient light. */
   void updateAmbientLight(float *value, uint8_t target, float speed);
   
   /** Show the current ambient light color. */
   void showAmbientLight();
-  
-  /** Update the white light. */
-  void updateWhiteLight();
-  
+    
   /** Show the curent white light brightness. */
   void showWhiteLight();
 
