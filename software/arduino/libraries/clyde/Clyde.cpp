@@ -33,13 +33,11 @@ CClyde::CClyde() {
   m_modules[0].module = NULL;
   m_modules[0].dpin = 7;
   m_modules[0].apin = 1;
-  m_modules[0].idNext = 0;
   m_modules[0].idLast = NULL;
   m_modules[0].idCount = 0;
   m_modules[1].module = NULL;
   m_modules[1].dpin = 8;
   m_modules[1].apin = 2;
-  m_modules[1].idNext = 0;
   m_modules[1].idLast = NULL;
   m_modules[1].idCount = 0;
   
@@ -88,10 +86,6 @@ CClyde::CClyde() {
 }
 
 void CClyde::begin() {
-#ifdef CLYDE_DEBUG
-  while (!Serial);
-#endif
-
   //setup module pins
   pinMode(m_modules[0].dpin, INPUT);
   digitalWrite(m_modules[0].dpin, LOW);
@@ -113,9 +107,70 @@ void CClyde::begin() {
   //load parameters from eeprom
   m_eeprom.readAmbientColor(&m_ambient.savedColor);
 
+  //detect the personality modules
+  detectPersonalities();
+  
   //set default lights off
   setAmbient(RGB(0,0,0));
   setWhite(255);
+}
+
+void CClyde::detectPersonalities() {
+  uint32_t now = millis();
+  
+  //detect personalities
+  for(int i = 0; i <= CModulePosition::ID_REPEAT; i++) {
+    //check each module position
+    
+    for(int j = 0; j < CModulePosition::NUM_MODULES; j++) {
+      CClydeModule* newModule = NULL;
+      
+      //TODO: this could be dynamic, modules could register. could have different detection schemes.
+      pinMode(m_modules[j].dpin, OUTPUT);
+      digitalWrite(m_modules[j].dpin, HIGH);
+      uint16_t idValue = analogRead(m_modules[j].apin);
+      pinMode(m_modules[j].dpin, INPUT);
+      
+      //check for each type of module
+      if (AfraidOfTheDark.id(idValue))
+        newModule = &AfraidOfTheDark;
+      else if (TouchyFeely.id(idValue))
+        newModule = &TouchyFeely;
+        
+      //if the detected module is different that last, then reset detection count
+      //TODO: reverse this if block to check for equality first
+      if (newModule != m_modules[j].idLast) {
+        m_modules[j].idCount = 1;
+        m_modules[j].idLast = newModule;
+        newModule = NULL;
+      }
+      //if the detected module is the same as the last, then increase detection count
+      else if (m_modules[j].idCount < CModulePosition::ID_REPEAT) {
+        m_modules[j].idCount++;
+        newModule = NULL;
+      }
+      //if the detected module has been the same enough times, then init the module
+      else {
+        if (m_modules[j].idCount == CModulePosition::ID_REPEAT) {
+          //if a module is detected, init
+          if (newModule != NULL) {
+            if (newModule->init(m_modules[j].apin, m_modules[j].dpin)) {
+              m_modules[j].module = newModule;
+              m_modules[j].idCount++;
+            }
+          }
+          //if no module is detected, the reset module position to default
+          else {     
+            pinMode(m_modules[j].dpin, INPUT);
+            digitalWrite(m_modules[j].dpin, LOW); 
+            
+            m_modules[j].module = newModule;          
+            m_modules[j].idCount++; 
+          }
+        }
+      }
+    }
+  }
 }
 
 void CClyde::update() {
@@ -125,7 +180,7 @@ void CClyde::update() {
   
   if (!m_eye.onceCalibrated) return;
   
-  updatePersonalities(); //TODO: maybe this should only happen once in begin
+  updatePersonalities();
 }
 
 void CClyde::updateEye() {
@@ -228,14 +283,14 @@ void CClyde::calibrateEye(uint16_t irValue) {
       m_eye.onceCalibrated = true;
 
       //calculate the threshold
-      //simple convertion from detected base ir to threshold
+      //simple conversion from detected base ir to threshold
       //the less ir detected (higher value) the less difference required to trigger
       uint16_t newThreshold = irAvg * CEye::CALIB_FORMULA_A + CEye::CALIB_FORMULA_B;
 
       #ifdef CLYDE_DEBUG
         if (m_eye.irThreshold != newThreshold) {
           Serial.print("Clyde: eye calibrated. threshold = ");
-          Serial.print(m_eye.irThreshold);
+          Serial.print(newThreshold);
           Serial.print(", range = ");
           Serial.print(m_eye.irMax - m_eye.irMin);
           Serial.print(", noisy restarts = ");
@@ -353,75 +408,17 @@ void CClyde::showWhiteLight() {
   analogWrite(m_white.pin, m_white.brightness);
 }
 
-void CClyde::updatePersonalities() {
-  uint32_t now = millis();
-  
-  //detect personalities
-  for(int i = 0; i < CModulePosition::NUM_MODULES; i++) {
-    //is it time to id this module again
-    if (now < m_modules[i].idNext) continue;
-  
-    CClydeModule* newModule = NULL;
-    
-    //TODO: this could be dynamic, modules could register. could have different detection schemes.
-    pinMode(m_modules[i].dpin, OUTPUT);
-    digitalWrite(m_modules[i].dpin, HIGH);
-    uint16_t idValue = analogRead(m_modules[i].apin);
-    pinMode(m_modules[i].dpin, INPUT);
-    
-    //check for each type of module
-    if (AfraidOfTheDark.id(idValue))
-      newModule = &AfraidOfTheDark;
-    else if (TouchyFeely.id(idValue))
-      newModule = &TouchyFeely;
-      
-    //if the detected module is different that last, then reset detection count
-    //TODO: reverse this if block to check for equality first
-    if (newModule != m_modules[i].idLast) {
-      m_modules[i].idCount = 0;
-      m_modules[i].idLast = newModule;
-      newModule = NULL;
-    }
-    //if the detected module is the same as the last, then increase detection count
-    else if (m_modules[i].idCount < CModulePosition::ID_REPEAT) {
-      m_modules[i].idCount++;
-      newModule = NULL;
-    }
-    //if the detected module has been the same enough times, then init the module
-    else {
-      if (m_modules[i].idCount == CModulePosition::ID_REPEAT) {
-        //if a module is detect, init
-        if (newModule != NULL) {
-          if (newModule->init(m_modules[i].apin, m_modules[i].dpin)) {
-            m_modules[i].module = newModule;
-            m_modules[i].idCount++;
-          }
-        }
-        //if no module is detected, the reset module position to default
-        else {     
-          pinMode(m_modules[i].dpin, INPUT);
-          digitalWrite(m_modules[i].dpin, LOW); 
-          
-          m_modules[i].module = newModule;          
-          m_modules[i].idCount++; 
-        }
-      }
-      
-      m_modules[i].idNext += CModulePosition::ID_INTERVAL_MS;
-    }
-  }
-  
-  //update modules
-  for(int i = 0; i < CModulePosition::NUM_MODULES; i++) {
-    if (m_modules[i].module != NULL)
-      m_modules[i].module->update(m_modules[i].apin, m_modules[i].dpin);
-  }
-}
-
 void CClyde::setAmbient(const RGB &c) {
   m_ambient.targetColor = c;
   m_ambient.color = m_ambient.targetColor;
   showAmbientLight();
+}
+
+void CClyde::updatePersonalities() {
+  for(int i = 0; i < CModulePosition::NUM_MODULES; i++) {
+    if (m_modules[i].module != NULL)
+      m_modules[i].module->update(m_modules[i].apin, m_modules[i].dpin);
+  }
 }
 
 void CClyde::fadeAmbient(const RGB &c, float spd) {

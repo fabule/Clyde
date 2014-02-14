@@ -27,13 +27,22 @@ CClydeTouchyFeely::CClydeTouchyFeely()
 }
 
 bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
-  if (!m_mpr121.testConnection())
+  if (!m_mpr121.testConnection()) {
+    #ifdef CLYDE_DEBUG
+    Serial.println("Clyde: Failed to initialize Touchy-Feely personality. Failed to connect to MPR121.");
+    #endif
     return false;
+  }
   
   m_mpr121.initialize(true);
  
   pinMode(dpin, INPUT);
-  digitalWrite(dpin, HIGH); //TODO check if module detection messes
+  digitalWrite(dpin, LOW);
+  
+  #ifdef CLYDE_DEBUG
+  Serial.println("Clyde: Touchy-Feely personality initialized.");
+  #endif
+  
   return true;
 }
 
@@ -41,7 +50,7 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   //check for mpr121 interrupt
   if (digitalRead(dpin))
     return;
-
+    
   //read the touch state from the MPR121
   uint16_t status = m_mpr121.getTouchStatus();
 

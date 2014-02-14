@@ -59,11 +59,9 @@ public:
   struct CModulePosition {
     static const uint8_t NUM_MODULES = 2;        /**< Total number of module positions. */
     static const uint8_t ID_REPEAT = 8;          /**< Number of success id required to identify a module. */ //TODO adjust this
-    static const uint16_t ID_INTERVAL_MS = 5000; /**< Internal in millis between module identifications. */ //TODO adjust this too
     CClydeModule* module;                        /**< Identified module. NULL if none. */
     uint8_t dpin;                                /**< Digital pin of this module's position. */
     uint8_t apin;                                /**< Analog pin of this module's position. */
-    uint32_t idNext;                             /**< Time when the next identification will occur in millis. */
     CClydeModule* idLast;                        /**< Module identified last time we checked. */
     uint8_t idCount;                             /**< Number of times idLast was identified in a row. */
   };
@@ -76,10 +74,10 @@ public:
     uint8_t r_pin;                        /**< Digital pin to control red color. */
     uint8_t g_pin;                        /**< Digital pin to control green color. */
     uint8_t b_pin;                        /**< Digital pin to control blue color. */
-    RGBf color;                          /**< Current color. */
-    RGB targetColor;                     /**< Target color, used for fading. */
-    RGB savedColor;                      /**< Saved ambient color to go back to. */
-    RGBf fadeSpeed;                      /**< Speed per color channel, used for fading. */
+    RGBf color;                           /**< Current color. */
+    RGB targetColor;                      /**< Target color, used for fading. */
+    RGB savedColor;                       /**< Saved ambient color to go back to. */
+    RGBf fadeSpeed;                       /**< Speed per color channel, used for fading. */
     
     /**
      * Check if the ambient light is on.
@@ -270,6 +268,12 @@ public:
   void blink(const RGB& rgb, uint8_t numBlinks, uint8_t msInterval);
 
 private:
+  /** Detect the personality modules. */
+  void detectPersonalities();
+
+  /** Update the personality modules. */
+  void updatePersonalities();  
+
   /** Update the eye. */
   void updateEye();
 
@@ -301,11 +305,6 @@ private:
   /**
    * Set the ambient light cycle.
    */
-  //void setCycle(ECycleType type, uint8_t steps, const uint8_t* colors, ECycleLoop loop);
-  
-  /**
-   * Set the ambient light cycle.
-   */
   void setCycle(ECycleType type, uint8_t steps, const RGB* colors, ECycleLoop loop);
   
   /** Update the ambient light cycle. */
@@ -315,9 +314,6 @@ private:
    * Update the ambient light cycle to the next step.
    */
   void updateCycleNextStep(uint32_t now);
-
-  /** Update the personality modules. */
-  void updatePersonalities();
 };
 
 extern CClyde Clyde; 

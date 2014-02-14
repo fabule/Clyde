@@ -33,12 +33,20 @@ CClydeAfraidOfTheDark::CClydeAfraidOfTheDark() : CClydeModule(ID_LOW, ID_HIGH) {
 
 bool CClydeAfraidOfTheDark::init(uint8_t apin, uint8_t dpin) {
   //read cycle from eeprom
-  if (!Clyde.eeprom()->readSunsetCycle(&m_sunsetSteps, &m_sunsetColors[0], &m_sunsetIntervals[0]))
+  if (!Clyde.eeprom()->readSunsetCycle(&m_sunsetSteps, &m_sunsetColors[0], &m_sunsetIntervals[0])) {
+    #ifdef CLYDE_DEBUG
+    Serial.println("Clyde: Failed to initialize Afraid of the Dark personality. Error reading sunset cycle from EEPROM.");
+    #endif
     return false;
+  }
 
   //setup pins
   pinMode(dpin, INPUT);
   digitalWrite(dpin, LOW);
+  
+  #ifdef CLYDE_DEBUG
+  Serial.println("Clyde: Afraid of the Dark personality initialized.");
+  #endif
   
   return true; 
 }
