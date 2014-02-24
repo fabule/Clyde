@@ -6,6 +6,7 @@ void setup() {
   Wire.begin();
   Serial.begin(9600);
   
+  //Clyde.eeprom()->reset();
   Clyde.begin();
 }
 
