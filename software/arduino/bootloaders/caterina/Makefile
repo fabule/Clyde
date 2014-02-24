@@ -55,11 +55,11 @@
 # USB vendor ID (VID)
 # reuse of this VID by others is forbidden by USB-IF
 # Fabule Fabrications Inc VID
-VID = 0x3228
+VID = 0x1d50
 
 # USB product ID (PID)
 # Clyde PID
-CLYDE_PID = 0x00FA
+CLYDE_PID = 0x609e
 
 # MCU name
 MCU = atmega32u4

@@ -222,17 +222,9 @@ pip-log.txt
 LUFA-*/
 .dep/
 
-software/arduino/bootloaders/caterina/Caterina-Clyde.eep
-
-software/arduino/bootloaders/caterina/Caterina-Clyde.eep
-
-software/arduino/bootloaders/caterina/Caterina-Clyde.eep
-
 software/arduino/bootloaders/caterina/Caterina.eep
 
 software/arduino/bootloaders/caterina/Caterina.elf
-
-software/arduino/bootloaders/caterina/Caterina-Clyde.hex
 
 software/arduino/bootloaders/caterina/Caterina.hex
 

@@ -86,12 +86,12 @@ ServiceBinary=%12%\%DRIVERFILENAME%.sys
 [SourceDisksFiles]
 [SourceDisksNames]
 [DeviceList]
-%DESCRIPTION%=DriverInstall, USB\VID_3328&PID_00FA
-%DESCRIPTION%=DriverInstall, USB\VID_3328&PID_80FA&MI_00
+%DESCRIPTION%=DriverInstall, USB\VID_1D50&PID_609E
+%DESCRIPTION%=DriverInstall, USB\VID_1D50&PID_609F&MI_00
 
 [DeviceList.NTamd64]
-%DESCRIPTION%=DriverInstall, USB\VID_3328&PID_00FA
-%DESCRIPTION%=DriverInstall, USB\VID_3328&PID_80FA&MI_00
+%DESCRIPTION%=DriverInstall, USB\VID_1D50&PID_609E
+%DESCRIPTION%=DriverInstall, USB\VID_1D50&PID_609F&MI_00
 
 ;------------------------------------------------------------------------------
 ;  String Definitions

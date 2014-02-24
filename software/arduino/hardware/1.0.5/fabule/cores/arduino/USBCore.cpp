@@ -1,5 +1,3 @@
-
-
 /* Copyright (c) 2010, Peter Barrett  
 **  
 ** Permission to use, copy, modify, and/or distribute this software for  
@@ -51,7 +49,7 @@ const u16 STRING_LANGUAGE[2] = {
 
 const u16 STRING_IPRODUCT[17] = {
 	(3<<8) | (2+2*16),
-#if USB_PID == 0x80FA
+#if USB_PID == 0x609f
 	'C','l','y','d','e',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '
 #else
 	'U','S','B',' ','I','O',' ','B','o','a','r','d',' ',' ',' ',' '
@@ -60,7 +58,7 @@ const u16 STRING_IPRODUCT[17] = {
 
 const u16 STRING_IMANUFACTURER[12] = {
 	(3<<8) | (2+2*11),
-#if USB_VID == 0x3228
+#if USB_VID == 0x1d50
 	'F','a','b','u','l','e',' ',' ',' ',' ',' '
 #else
 	'U','n','k','n','o','w','n',' ',' ',' ',' '

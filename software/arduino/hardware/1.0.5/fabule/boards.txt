@@ -14,8 +14,8 @@ clyde.bootloader.unlock_bits=0x3F
 clyde.bootloader.lock_bits=0x2F
 clyde.build.mcu=atmega32u4
 clyde.build.f_cpu=16000000L
-clyde.build.vid=0x3328
-clyde.build.pid=0x80FA
+clyde.build.vid=0x1d50
+clyde.build.pid=0x609f
 clyde.build.core=arduino
 clyde.build.variant=leonardo
 

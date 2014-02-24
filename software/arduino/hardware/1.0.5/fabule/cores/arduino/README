@@ -1,0 +1,18 @@
+Clyde Arduino Core
+==================
+
+Changes
+-------
+
+* Added "Fabule" and "Clyde" to USBCode.cpp
+
+Attribution
+-----------
+
+This Clyde Arduino core is based on the core in release 1.0.5 found at:
+https://github.com/arduino/Arduino/releases/tag/1.0.5
+
+This bootloader, just like the original Caterina, uses the LUFA library found at:
+https://code.google.com/p/lufa-lib/
+more specifically, it was tested with the "111009" release of LUFA found at:
+https://code.google.com/p/lufa-lib/downloads/detail?name=LUFA-111009.zip&can=2&q=

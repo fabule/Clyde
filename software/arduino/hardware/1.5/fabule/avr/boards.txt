@@ -1,10 +1,10 @@
 ##############################################################
 
 clyde.name=Clyde
-clyde.vid.0=0x3328
-clyde.pid.0=0x00FA
-clyde.vid.1=0x3328
-clyde.pid.1=0x80FA
+clyde.vid.0=0x1d50
+clyde.pid.0=0x609e
+clyde.vid.1=0x1d50
+clyde.pid.1=0x609f
 clyde.upload.tool=avrdude
 clyde.upload.protocol=avr109
 clyde.upload.maximum_size=28672
@@ -24,8 +24,8 @@ clyde.bootloader.lock_bits=0x2F
 
 clyde.build.mcu=atmega32u4
 clyde.build.f_cpu=16000000L
-clyde.build.vid=0x3328
-clyde.build.pid=0x80FA
+clyde.build.vid=0x1d50
+clyde.build.pid=0x609f
 clyde.build.usb_product="Clyde"
 clyde.build.board=AVR_CLYDE
 clyde.build.core=arduino
