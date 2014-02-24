@@ -140,21 +140,21 @@ THE SOFTWARE.
 #define DEBOUNCE_TOUCH_AND_RELEASE 0x5B
 #define AFE_CONFIGURATION          0x5C
 
-#define FILTER_CONFIG    0x5D
-#define ELECTRODE_CONFIG 0x5E
-#define ELE0_CURRENT     0x5F
-#define ELE1_CURRENT     0x60
-#define ELE2_CURRENT     0x61
-#define ELE3_CURRENT     0x62
-#define ELE4_CURRENT     0x63
-#define ELE5_CURRENT     0x64
-#define ELE6_CURRENT     0x65
-#define ELE7_CURRENT     0x66
-#define ELE8_CURRENT     0x67
-#define ELE9_CURRENT     0x68
-#define ELE10_CURRENT    0x69
-#define ELE11_CURRENT    0x6A
-#define ELEPROX_CURRENT  0x6B
+#define FILTER_CONFIG              0x5D
+#define ELECTRODE_CONFIG           0x5E
+#define ELE0_CURRENT               0x5F
+#define ELE1_CURRENT               0x60
+#define ELE2_CURRENT               0x61
+#define ELE3_CURRENT               0x62
+#define ELE4_CURRENT               0x63
+#define ELE5_CURRENT               0x64
+#define ELE6_CURRENT               0x65
+#define ELE7_CURRENT               0x66
+#define ELE8_CURRENT               0x67
+#define ELE9_CURRENT               0x68
+#define ELE10_CURRENT              0x69
+#define ELE11_CURRENT              0x6A
+#define ELEPROX_CURRENT            0x6B
 
 #define ELE0_ELE1_CHARGE_TIME   0x6C
 #define ELE2_ELE3_CHARGE_TIME   0x6D

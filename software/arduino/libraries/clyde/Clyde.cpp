@@ -276,7 +276,7 @@ void CClyde::calibrateEye(uint16_t irValue) {
       //simple conversion from detected base ir to threshold
       //the less ir detected (higher value) the less difference required to trigger
       uint16_t newThreshold = irAvg * CEye::CALIB_FORMULA_A + CEye::CALIB_FORMULA_B;
-
+/*
       #ifdef CLYDE_DEBUG
         if (m_eye.irThreshold != newThreshold) {
           Serial.print("Clyde: eye calibrated. threshold = ");
@@ -288,7 +288,7 @@ void CClyde::calibrateEye(uint16_t irValue) {
         }
         restartCount = 0;
       #endif      
-      
+*/     
       m_eye.irThreshold = newThreshold;
     }
 

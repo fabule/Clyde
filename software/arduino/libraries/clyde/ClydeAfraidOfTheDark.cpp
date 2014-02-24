@@ -79,11 +79,18 @@ void CClydeAfraidOfTheDark::apply(uint16_t light) {
   //start checking for the start of a new sunset
   else if (!m_ready && light >= RESET_THRESHOLD) {
     m_ready = true;
+    #ifdef CLYDE_DEBUG
+    Serial.println("Clyde: Afraid of the Dark personality threshold reset.");
+    #endif
   }
 }
 
 //TODO probably doesn't need extra method
 void CClydeAfraidOfTheDark::startSunset() {
+  #ifdef CLYDE_DEBUG
+  Serial.println("Clyde: Afraid of the Dark personality start sunset.");
+  #endif
+
   if (Clyde.cycle()->is(SUNSET))
     return;
   

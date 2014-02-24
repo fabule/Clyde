@@ -141,7 +141,7 @@ void MPR121::initialize(bool autoconfig)
   //   0x01 = 2ms, 0x02 = 4 ms; and so on to 0x07 = 128 ms.  Most of 
   //   the time, 0x04 results in the best compromise between power 
   //   consumption and response time.
-  I2Cdev::writeByte(m_devAddr, FILTER_CONFIG, 0x04);
+  I2Cdev::writeByte(m_devAddr, FILTER_CONFIG, 0x24);
 
   // Section E
   // Description:
@@ -174,6 +174,17 @@ void MPR121::initialize(bool autoconfig)
   //   to change.  In a production system, this register will only need 
   //   to be written when the mode is changed from Standby to Run or vice versa.
   I2Cdev::writeByte(m_devAddr, ELECTRODE_CONFIG, 0x0C);   
+  
+  // Section G
+  // Description:
+  //   This register controls the debounce. It identifies the number of
+  //   consecutive times the device must detect a touch or release to trigger
+  //   the event. This helps minimizing false positives.
+  I2Cdev::writeByte(m_devAddr, DEBOUNCE_TOUCH_AND_RELEASE, 0x72); 
+ 
+  //TODO 
+  //I2Cdev::writeByte(m_devAddr, AFE_CONFIGURATION, 0 << 6 | 16 ); 
+  //I2Cdev::writeByte(m_devAddr, FILTER_CONFIG, 1 << 5 | 0 << 3 | 4);
 }
 //
 // check to see if the filter configuration register contains 0x04,

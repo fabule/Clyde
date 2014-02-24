@@ -35,12 +35,12 @@ class CClydeTouchyFeely : public CClydeModule {
   static const uint16_t ID_LOW = 1001;            /**< low limit of read identification value */
   static const uint16_t ID_HIGH = 1007;           /**< high limit of read identification value */
 
-  static const uint32_t TICKLE_INTERVAL = 2500;    /**< max time in millis between touch events to trigger laugh */
+  static const uint32_t TICKLE_INTERVAL = 2500;   /**< max time in millis between touch events to trigger laugh */
   static const uint8_t TICKLE_REPEAT = 4;         /**< number of consecutive touch events to trigger laugh */
   
-  static const RGB SELECT_COLORS[];           /**< colors of the color select cycle */
+  static const RGB SELECT_COLORS[];               /**< colors of the color select cycle */
   static const uint16_t SELECT_INTERVALS[];       /**< intervals of the color select cycle */
-  static const uint8_t SELECT_STEPS = 8;          /**< steps in the color select cycle */
+  static const uint8_t SELECT_STEPS;          /**< steps in the color select cycle */
   
   MPR121 m_mpr121;          /**< interface to the mpr121 */
   uint8_t m_tickleCount;    /**< number of detected tickle touch events */

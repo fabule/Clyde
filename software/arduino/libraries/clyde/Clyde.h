@@ -24,7 +24,7 @@
 #include "ClydeModule.h"
 
 //not implemented yet
-//#define CLYDE_DEBUG
+#define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.
@@ -85,7 +85,7 @@ public:
     bool isOn() { return targetColor.r > 0 || targetColor.g > 0 || targetColor.b > 0; }
     
     /** Save the current color. */
-    void save() { savedColor = RGB(color.r, color.g, color.b); }
+    void save() { if (color.r + color.g + color.b > 10) savedColor = RGB(color.r, color.g, color.b); }
   };
   
   /**

@@ -19,8 +19,9 @@
 
 CClydeTouchyFeely TouchyFeely;
 
-const RGB CClydeTouchyFeely::SELECT_COLORS[] = {RGB(0,0,0), RGB(255,0,0), RGB(255,255,0), RGB(0,255,0), RGB(0,255,255), RGB(0,0,255), RGB(255,0,255), RGB(255,255,255)};
-const uint16_t CClydeTouchyFeely::SELECT_INTERVALS[] = {100, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+const RGB CClydeTouchyFeely::SELECT_COLORS[] = {RGB(255,0,0), RGB(255,255,0), RGB(0,255,0), RGB(0,255,255), RGB(0,0,255), RGB(255,0,255), RGB(255,255,255)};
+const uint16_t CClydeTouchyFeely::SELECT_INTERVALS[] = {1000, 1000, 1000, 1000, 1000, 1000, 1000};
+const uint8_t CClydeTouchyFeely::SELECT_STEPS = 7;
   
 CClydeTouchyFeely::CClydeTouchyFeely()
   : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR), m_tickleCount(0), m_firstTickle(0), m_lastStopStep(0) {
@@ -47,6 +48,9 @@ bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
 }
 
 void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
+  //only active when the ambient light is on
+  if (Clyde.ambient()->isOn()) return;
+
   //check for mpr121 interrupt
   if (digitalRead(dpin))
     return;
@@ -58,10 +62,20 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   if (!Clyde.cycle()->is(LAUGH)) { //TODO better method names: Clyde.isLaughing()
     //and any leg is touched, then start color selection
     if (status & 0x0FFF) {
+      #ifdef CLYDE_DEBUG
+      Serial.print(millis());
+      Serial.print(" ");
+      Serial.println("Clyde: Touchy-Feely detected a touch.");
+      #endif
       startColorSelect();
     }
     //if leg is not touched, stop cycle
     else {
+      #ifdef CLYDE_DEBUG
+      Serial.print(millis());
+      Serial.print(" ");
+      Serial.println("Clyde: Touchy-Feely detected a release.");
+      #endif
       stopColorSelect();
       tickleCheck();
     }
@@ -142,18 +156,6 @@ void CClydeTouchyFeely::startColorSelect() {
   #ifdef CLYDE_DEBUG
   Serial.println("Clyde: touchy-feely color selection cycle STARTED");
   #endif
-
-  //if the current cycle was already the color selection cycle, then continue
-  //TODO double check this, not quite sure...
-  /*if (Clyde.cycle()->is(SELECT)) {
-    RGBf ambientColor = Clyde.ambient()->color;
-    Clyde.cycle()->stepColor = RGB(ambientColor.r, ambientColor.g, ambientColor.b);
-    Clyde.cycleNextStep(millis());
-  }
-  //set the new color select cycle
-  else {
-    Clyde.setCycle(SELECT, SELECT_STEPS, SELECT_COLORS, SELECT_INTERVALS, LOOP);
-  }*/
   
   Clyde.setCycle(SELECT, SELECT_STEPS, SELECT_COLORS, SELECT_INTERVALS, LOOP);
   Clyde.setCycleStep(m_lastStopStep);
