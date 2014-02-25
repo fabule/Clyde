@@ -46,6 +46,8 @@ class CClydeTouchyFeely : public CClydeModule {
   uint8_t m_tickleCount;    /**< number of detected tickle touch events */
   uint32_t m_firstTickle;   /**< time in millis we detected the first tickle tap */
   uint8_t m_lastStopStep;   /**< step index when the color select cycle was stopped. */
+  uint16_t m_touchStatus;   /**< current status of touch electrodes. */
+  uint32_t m_touchStart;    /**< time in millis when the active touch started. */
   
   RGB m_laughColors[CClyde::CAmbientCycle::MAX_CYCLE_LENGTH];           /**< colors of the laugh cycle */   //this could be in the main class
   uint16_t m_laughIntervals[CClyde::CAmbientCycle::MAX_CYCLE_LENGTH];   /**< intervals of the laugh cycle */

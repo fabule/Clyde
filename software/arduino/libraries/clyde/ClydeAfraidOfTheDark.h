@@ -52,11 +52,6 @@ public:
   void update(uint8_t apin, uint8_t dpin);
   
 private:
-  /**
-   * Apply the module behavior given the passed light level.
-   */ 
-  void apply(uint16_t light);
-  
   /** Start the sunset cycle. */
   void startSunset();
 };

@@ -24,7 +24,7 @@ const uint16_t CClydeTouchyFeely::SELECT_INTERVALS[] = {1000, 1000, 1000, 1000, 
 const uint8_t CClydeTouchyFeely::SELECT_STEPS = 7;
   
 CClydeTouchyFeely::CClydeTouchyFeely()
-  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR), m_tickleCount(0), m_firstTickle(0), m_lastStopStep(0) {
+  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR), m_tickleCount(0), m_firstTickle(0), m_lastStopStep(0), m_touchStart(0) {
 }
 
 bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
@@ -49,25 +49,30 @@ bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
 
 void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   //only active when the ambient light is on
-  if (Clyde.ambient()->isOn()) return;
+  if (!Clyde.ambient()->isOn()) return;
 
+  //start color select after a few millis to protect from false positive
+  if ((m_touchStatus & 0x0FFF) && !Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH) && (millis()-m_touchStart > 100))
+    startColorSelect();
+  
   //check for mpr121 interrupt
   if (digitalRead(dpin))
     return;
     
   //read the touch state from the MPR121
-  uint16_t status = m_mpr121.getTouchStatus();
+  m_touchStatus = m_mpr121.getTouchStatus();
 
   //if clyde is not laughing already
   if (!Clyde.cycle()->is(LAUGH)) { //TODO better method names: Clyde.isLaughing()
     //and any leg is touched, then start color selection
-    if (status & 0x0FFF) {
+    if (m_touchStatus & 0x0FFF) {
       #ifdef CLYDE_DEBUG
       Serial.print(millis());
       Serial.print(" ");
       Serial.println("Clyde: Touchy-Feely detected a touch.");
       #endif
-      startColorSelect();
+      
+      m_touchStart = millis();
     }
     //if leg is not touched, stop cycle
     else {
@@ -76,12 +81,13 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
       Serial.print(" ");
       Serial.println("Clyde: Touchy-Feely detected a release.");
       #endif
-      stopColorSelect();
+      
+      stopColorSelect();  
       tickleCheck();
     }
   }
   //if clyde is laughing, check to tickles to see if it needs to continue
-  else if (!(status & 0x0FFF)) {
+  else if (!(m_touchStatus & 0x0FFF)) {
     tickleCheck();
   }
 }
@@ -146,7 +152,7 @@ void CClydeTouchyFeely::laugh() {
   if (laughSteps < CClyde::CAmbientCycle::MAX_CYCLE_LENGTH)
     laughSteps++;
     
-  m_laughColors[laughSteps-1] = RGB(0, 0, 0);
+  m_laughColors[laughSteps-1] = RGB(Clyde.ambient()->color.r, Clyde.ambient()->color.g, Clyde.ambient()->color.b);
   m_laughIntervals[laughSteps-1] = random(150, 200);
   
   Clyde.setCycle(LAUGH, laughSteps, &m_laughColors[0], m_laughIntervals, NO_LOOP);

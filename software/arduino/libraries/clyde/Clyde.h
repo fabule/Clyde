@@ -24,7 +24,7 @@
 #include "ClydeModule.h"
 
 //not implemented yet
-#define CLYDE_DEBUG
+//#define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.

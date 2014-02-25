@@ -52,18 +52,10 @@ bool CClydeAfraidOfTheDark::init(uint8_t apin, uint8_t dpin) {
 }
 
 void CClydeAfraidOfTheDark::update(uint8_t apin, uint8_t dpin) {
-  //do nothing if the white light is on
-  if (Clyde.white()->isOn()) return;
-  
   unsigned short light = analogRead(apin);  
-  apply(light);  
-  m_lastLight = light;
-}
 
-//TODO does this need to be another method, is it really easier for unit tests?
-void CClydeAfraidOfTheDark::apply(uint16_t light) {
   //if the light level is below the threshold
-  if (light <= START_THRESHOLD) {
+  if (!Clyde.white()->isOn() && light <= START_THRESHOLD) {
     //and the last time we checked it was above
     //then set the time until which we need to remain below threshold
     if (m_lastLight > START_THRESHOLD) {
@@ -83,6 +75,8 @@ void CClydeAfraidOfTheDark::apply(uint16_t light) {
     Serial.println("Clyde: Afraid of the Dark personality threshold reset.");
     #endif
   }
+
+  m_lastLight = light;
 }
 
 //TODO probably doesn't need extra method
