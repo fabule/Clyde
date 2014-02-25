@@ -16,7 +16,7 @@ clyde.upload.wait_for_upload_port=true
 
 clyde.bootloader.tool=avrdude
 clyde.bootloader.low_fuses=0xff
-clyde.bootloader.high_fuses=0xd8
+clyde.bootloader.high_fuses=0xd0
 clyde.bootloader.extended_fuses=0xcb
 clyde.bootloader.file=caterina/Caterina-Clyde.hex
 clyde.bootloader.unlock_bits=0x3F
