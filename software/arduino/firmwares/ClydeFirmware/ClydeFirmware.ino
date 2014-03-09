@@ -1,16 +1,20 @@
 #include <Wire.h>
 #include <EEPROM.h>
 #include <Clyde.h>
+#include <SerialCommand.h>
 
 void setup() {
   Wire.begin();
   Serial.begin(9600);
   
-  //Clyde.eeprom()->reset();
+  Clyde.eeprom()->reset();
   Clyde.begin();
 }
 
 void loop() {
+  //read the serial communication if any
+  Clyde.readSerial();
+  
   //calibrate the eye and check for press
   Clyde.updateEye();
   

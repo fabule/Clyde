@@ -39,10 +39,6 @@ THE SOFTWARE.
 MPR121::MPR121(uint8_t address) :
   m_devAddr(address)
 {
-  for (int ch = 0; ch < NUM_CHANNELS; ch++) {
-    m_callbackMap[ch][TOUCHED] = 0;
-    m_callbackMap[ch][RELEASED] = 0;
-  }
 }
 
 void MPR121::initialize(bool autoconfig)
@@ -141,7 +137,9 @@ void MPR121::initialize(bool autoconfig)
   //   0x01 = 2ms, 0x02 = 4 ms; and so on to 0x07 = 128 ms.  Most of 
   //   the time, 0x04 results in the best compromise between power 
   //   consumption and response time.
-  I2Cdev::writeByte(m_devAddr, FILTER_CONFIG, 0x24);
+  //I2Cdev::writeByte(m_devAddr, FILTER_CONFIG_0, 0 << 6 | 32 ); 
+  //I2Cdev::writeByte(m_devAddr, FILTER_CONFIG_1, 2 << 5 | 0 << 3 | 4);
+  I2Cdev::writeByte(m_devAddr, FILTER_CONFIG_1, 0x04);
 
   // Section E
   // Description:
@@ -181,10 +179,6 @@ void MPR121::initialize(bool autoconfig)
   //   consecutive times the device must detect a touch or release to trigger
   //   the event. This helps minimizing false positives.
   I2Cdev::writeByte(m_devAddr, DEBOUNCE_TOUCH_AND_RELEASE, 0x72); 
- 
-  //TODO 
-  //I2Cdev::writeByte(m_devAddr, AFE_CONFIGURATION, 0 << 6 | 16 ); 
-  //I2Cdev::writeByte(m_devAddr, FILTER_CONFIG, 1 << 5 | 0 << 3 | 4);
 }
 //
 // check to see if the filter configuration register contains 0x04,
@@ -210,23 +204,4 @@ uint16_t MPR121::getTouchStatus() {
   I2Cdev::readByte(m_devAddr, ELE8_ELE11_ELEPROX_TOUCH_STATUS, &buf, I2Cdev::readTimeout, false);
   statusBuf += (buf << 8);
   return statusBuf;
-}
-
-void MPR121::setCallback(uint8_t channel, EventType event, CallbackPtrType callbackPtr) {
-  m_callbackMap[channel][event] = callbackPtr;
-}
-    
-void MPR121::serviceCallbacks() {
-  for (uint8_t channel = 0; channel < NUM_CHANNELS; channel++) { 
-    bool touchStatus = getTouchStatus(channel);
-    if (touchStatus != m_prevTouchStatus[channel]) {
-      for (uint8_t type = 0; type < NUM_EVENTS; type++) { 
-        const CallbackPtrType cb = touchStatus ? m_callbackMap[channel][TOUCHED] : m_callbackMap[channel][RELEASED]; 
-        if (cb != 0) {
-          cb();           
-        }
-      }
-      m_prevTouchStatus[channel] = touchStatus; 
-    }
-  }
 }

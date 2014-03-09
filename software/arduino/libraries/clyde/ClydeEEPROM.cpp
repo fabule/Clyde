@@ -141,9 +141,11 @@ bool CClydeEEPROM::readSunsetCycle(uint8_t* steps, RGB *colors, unsigned long *i
 }
 
 void CClydeEEPROM::reset() {
+  //char serial[7] = "012345";
   uint16_t ver = 1;
   RGB ambient(20,255,54);
   
+  //writeSerial(&serial[0]);
   writeVersion(ver);
   writeAmbientColor(&ambient);
   

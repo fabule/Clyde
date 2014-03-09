@@ -35,7 +35,7 @@ bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
     return false;
   }
   
-  m_mpr121.initialize(true);
+  m_mpr121.initialize(false);
  
   pinMode(dpin, INPUT);
   digitalWrite(dpin, LOW);
@@ -54,11 +54,11 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   //start color select after a few millis to protect from false positive
   if ((m_touchStatus & 0x0FFF) && !Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH) && (millis()-m_touchStart > 100))
     startColorSelect();
-  
+
   //check for mpr121 interrupt
   if (digitalRead(dpin))
     return;
-    
+  
   //read the touch state from the MPR121
   m_touchStatus = m_mpr121.getTouchStatus();
 
@@ -67,8 +67,6 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
     //and any leg is touched, then start color selection
     if (m_touchStatus & 0x0FFF) {
       #ifdef CLYDE_DEBUG
-      Serial.print(millis());
-      Serial.print(" ");
       Serial.println("Clyde: Touchy-Feely detected a touch.");
       #endif
       
@@ -77,8 +75,6 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
     //if leg is not touched, stop cycle
     else {
       #ifdef CLYDE_DEBUG
-      Serial.print(millis());
-      Serial.print(" ");
       Serial.println("Clyde: Touchy-Feely detected a release.");
       #endif
       

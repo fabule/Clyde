@@ -18,13 +18,14 @@
 #define __CLYDE_H
 
 #include <stdint.h>
+#include <SerialCommand.h>
 
 #include "colortypes.h"
 #include "ClydeEEPROM.h"
 #include "ClydeModule.h"
 
 //not implemented yet
-//#define CLYDE_DEBUG
+//define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.
@@ -173,6 +174,8 @@ private:
   CEye m_eye;
   CAmbientCycle m_cycle;
   
+  SerialCommand m_sCmd;
+  
 public:
   /** Contructor. */
   CClyde();
@@ -183,6 +186,9 @@ public:
   /** Check if eye was calibrated once. */
   bool wasEyeCalibratedOnce() { return m_eye.onceCalibrated; }
 
+  /** Read serial communication. */
+  void readSerial();
+  
   /** Update the eye. */
   void updateEye();
   
@@ -279,6 +285,12 @@ public:
    */
   void blink(const RGB& rgb, uint8_t numBlinks, uint8_t msInterval);
 
+  //
+  // Serial Commands
+  //
+  static void cmdSerial();
+  static void cmdVersion();
+  
 private:
   /** Detect the personality modules. */
   void detectPersonalities();
@@ -299,7 +311,7 @@ private:
   /** Show the current ambient light color. */
   void showAmbientLight();
     
-  /** Show the curent white light brightness. */
+  /** Show the current white light brightness. */
   void showWhiteLight();
 
   /**
@@ -314,6 +326,13 @@ private:
    * Update the ambient light cycle to the next step.
    */
   void updateCycleNextStep(uint32_t now);
+  
+  //
+  // Serial Commands
+  //
+  static void sendSuccessResponse();
+  static void sendSuccessResponse(String response);
+  static void sendSuccessResponse(uint16_t response);
 };
 
 extern CClyde Clyde; 

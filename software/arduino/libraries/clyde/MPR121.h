@@ -138,9 +138,9 @@ THE SOFTWARE.
 #define ELEPROX_TOUCH_THRESHOLD    0x59
 #define ELEPROX_RELEASE_THRESHOLD  0x5A
 #define DEBOUNCE_TOUCH_AND_RELEASE 0x5B
-#define AFE_CONFIGURATION          0x5C
 
-#define FILTER_CONFIG              0x5D
+#define FILTER_CONFIG_0            0x5C
+#define FILTER_CONFIG_1            0x5D
 #define ELECTRODE_CONFIG           0x5E
 #define ELE0_CURRENT               0x5F
 #define ELE1_CURRENT               0x60
@@ -192,8 +192,6 @@ class MPR121
       NUM_EVENTS = 2
     };
   
-    typedef void (*CallbackPtrType)(void);
-    
     // constructor
     // takes a 7-b I2C address to use (0x5A by default, assumes addr pin grounded)
     MPR121(uint8_t address = MPR121_DEFAULT_ADDRESS);
@@ -208,14 +206,9 @@ class MPR121
     bool getTouchStatus(uint8_t channel);
     // when not given a channel, returns a bitfield of all touch channels.
     uint16_t getTouchStatus();
-
-    void setCallback(uint8_t channel, EventType event, CallbackPtrType callbackPtr);
-    
-    void serviceCallbacks();
     
   private:
     uint8_t m_devAddr; // contains the I2C address of the device
-    CallbackPtrType m_callbackMap[NUM_CHANNELS][NUM_EVENTS];
     bool m_prevTouchStatus[NUM_CHANNELS];
     
 };

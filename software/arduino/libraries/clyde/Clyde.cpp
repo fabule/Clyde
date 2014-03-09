@@ -86,6 +86,10 @@ CClyde::CClyde() {
 }
 
 void CClyde::begin() {
+  //init serial commands
+  m_sCmd.addCommand("SERIAL", Clyde.cmdSerial);
+  m_sCmd.addCommand("VERSION", Clyde.cmdVersion);
+
   //setup module pins
   pinMode(m_modules[0].dpin, INPUT);
   digitalWrite(m_modules[0].dpin, LOW);
@@ -116,8 +120,6 @@ void CClyde::begin() {
 }
 
 void CClyde::detectPersonalities() {
-  uint32_t now = millis();
-  
   //detect personalities
   for(int i = 0; i <= CModulePosition::ID_REPEAT; i++) {
     //check each module position
@@ -171,6 +173,10 @@ void CClyde::detectPersonalities() {
       }
     }
   }
+}
+
+void CClyde::readSerial() {
+  m_sCmd.readSerial();
 }
 
 void CClyde::updateEye() {
@@ -589,4 +595,33 @@ void CClyde::speedUpCycle(uint32_t factor) {
   
   //jump cycle to next color
   cycleNextStep(millis());
+}
+
+//
+// Serial Commands
+//
+void CClyde::cmdSerial() {
+  char serial[7] = {0};
+  Clyde.eeprom()->readSerial(&serial[0]);  
+  sendSuccessResponse(serial);
+}
+
+void CClyde::cmdVersion() {
+  uint16_t version = 0;
+  Clyde.eeprom()->readVersion(&version);  
+  sendSuccessResponse(version);
+}
+
+void CClyde::sendSuccessResponse() {
+  Serial.println("OK");
+}
+
+void CClyde::sendSuccessResponse(String response) {
+  Serial.print("OK ");
+  Serial.println(response);
+}
+
+void CClyde::sendSuccessResponse(uint16_t response) {
+  Serial.print("OK ");
+  Serial.println(response);
 }
