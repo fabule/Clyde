@@ -18,14 +18,14 @@
 #define __CLYDE_H
 
 #include <stdint.h>
-#include <SerialCommand.h>
+#include <SoftwareSerial.h>
 
 #include "colortypes.h"
 #include "ClydeEEPROM.h"
 #include "ClydeModule.h"
 
 //not implemented yet
-//define CLYDE_DEBUG
+//#define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.
@@ -46,6 +46,51 @@ enum ECycleLoop {
   LOOP,
   LOOP_ONCE,
   NO_LOOP
+};
+
+/**
+ * Enum types for mp3 op codes.
+ */
+enum EOpCode {
+  //TODO check WT5001 for other useful features to implement if space
+  OP_NONE = 0,
+  OP_PLAY = 0xA0,
+  OP_PAUSE = 0xA3,
+  OP_STOP = 0xA4,
+  OP_SET_VOLUME = 0xA7,
+  OP_SET_PLAY_MODE = 0xA9,
+  OP_SET_DATE = 0xB1,
+  OP_SET_TIME = 0xB2,
+  OP_PLAY_STATE = 0xC2
+};
+
+/**
+ * Enum types for mp3 play modes.
+ */
+enum EPlayMode {
+  PLAYMODE_SINGLE = 0x00,
+  PLAYMODE_SINGLE_CYCLE = 0x01,
+  PLAYMODE_ALL_CYCLE = 0x02,
+  PLAYMODE_RANDOM = 0x03
+};
+
+/**
+ * Enum types of the sound file indexes for Loudmouth
+ */
+enum EAudioIndex {
+  SND_ON = 1,
+  SND_OFF = 2,
+  SND_HAPPY = 3,
+  SND_LAUGH = 4,
+  SND_ERROR = 5,
+  SND_CLOCK_1H = 6,
+  SND_CLOCK_15MIN = 7,
+  SND_CLOCK_30MIN = 8,
+  SND_CLOCK_45MIN = 9,
+  SND_CLOCK_CHIME = 10,
+  SND_NOTIFICATION = 11,
+  SND_AU_CLAIR_DE_LA_LUNE = 12,
+  SND_DAISY_BELL = 13
 };
 
 /**
@@ -165,6 +210,24 @@ public:
     /** Turn off the cycle. */
     void off() { type = OFF; }
   };
+  
+  /**
+   * The mouth / speaker / mp3 player
+   */
+  struct CMouth {
+    static const uint16_t ACK_TIMEOUT = 1000;
+
+    static const uint8_t SELECT_PIN = 4;
+    static const uint8_t DETECT_PIN = 15;
+    static const uint8_t RX_PIN = 14;
+    static const uint8_t TX_PIN = 16;
+
+    bool detected;
+    EOpCode waitingOpCode;
+    uint32_t lastCmdTime;
+    
+    static SoftwareSerial mp3;
+  };
     
 private:
   CModulePosition m_modules[CModulePosition::NUM_MODULES];
@@ -173,8 +236,7 @@ private:
   CClydeEEPROM m_eeprom;
   CEye m_eye;
   CAmbientCycle m_cycle;
-  
-  SerialCommand m_sCmd;
+  CMouth m_mouth;
   
 public:
   /** Contructor. */
@@ -186,11 +248,11 @@ public:
   /** Check if eye was calibrated once. */
   bool wasEyeCalibratedOnce() { return m_eye.onceCalibrated; }
 
-  /** Read serial communication. */
-  void readSerial();
-  
-  /** Update the eye. */
+  /** Update the eye / infrared switch. */
   void updateEye();
+  
+  /** Update the mouth / sound shield. */
+  void updateMouth();
   
   /** Update the ambient light. */
   void updateAmbientLight();
@@ -284,17 +346,45 @@ public:
    * Make the ambient light blink.
    */
   void blink(const RGB& rgb, uint8_t numBlinks, uint8_t msInterval);
+  
+  /**
+   * Set the loudmouth mp3 player play mode.
+   */
+  EOpCode setPlayMode(EPlayMode playmode);
+  
+  /**
+   * Play a file using the Loudmouth shield.
+   */
+  EOpCode play(uint16_t index);
+  
+  /**
+   * Get the play state of the Loudmouth shield.
+   */
+  EOpCode playState();
+  
+  /**
+   * Set volume of the Loudmouth shield.
+   * @volume level 0 - 31
+   */
+  EOpCode setVolume(uint8_t volume);  
+  
+  /**
+   * Pause the audio of the Loudmouth shield.
+   */
+  EOpCode pause(void);
 
-  //
-  // Serial Commands
-  //
-  static void cmdSerial();
-  static void cmdVersion();
+  /**
+   * Stop the audio of the Loudmouth shield.
+   */
+  EOpCode stop(void);
   
 private:
   /** Detect the personality modules. */
   void detectPersonalities();
 
+  /** Detect the loudmouth shield. */
+  void detectMouth();
+  
   /**
    * Calibrate the eye.
    */
@@ -326,13 +416,6 @@ private:
    * Update the ambient light cycle to the next step.
    */
   void updateCycleNextStep(uint32_t now);
-  
-  //
-  // Serial Commands
-  //
-  static void sendSuccessResponse();
-  static void sendSuccessResponse(String response);
-  static void sendSuccessResponse(uint16_t response);
 };
 
 extern CClyde Clyde; 

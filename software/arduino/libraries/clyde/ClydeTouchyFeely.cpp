@@ -152,6 +152,8 @@ void CClydeTouchyFeely::laugh() {
   m_laughIntervals[laughSteps-1] = random(150, 200);
   
   Clyde.setCycle(LAUGH, laughSteps, &m_laughColors[0], m_laughIntervals, NO_LOOP);
+  Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
+  Clyde.play(SND_LAUGH);
 }
 
 void CClydeTouchyFeely::startColorSelect() {
@@ -161,6 +163,9 @@ void CClydeTouchyFeely::startColorSelect() {
   
   Clyde.setCycle(SELECT, SELECT_STEPS, SELECT_COLORS, SELECT_INTERVALS, LOOP);
   Clyde.setCycleStep(m_lastStopStep);
+  
+  Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
+  Clyde.play(SND_HAPPY);
 }
 
 void CClydeTouchyFeely::stopColorSelect() {
@@ -173,6 +178,9 @@ void CClydeTouchyFeely::stopColorSelect() {
   
   Clyde.cycle()->off();
   Clyde.ambient()->save();
+  
+  //stop audio
+  Clyde.stop();
 }
 
 void CClydeTouchyFeely::debugAutoConfig() {

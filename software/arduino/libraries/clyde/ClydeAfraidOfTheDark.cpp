@@ -53,16 +53,24 @@ bool CClydeAfraidOfTheDark::init(uint8_t apin, uint8_t dpin) {
 
 void CClydeAfraidOfTheDark::update(uint8_t apin, uint8_t dpin) {
   unsigned short light = analogRead(apin);  
-
+  
+  //if the white light is on, then disable
+  if (Clyde.white()->isOn()) {
+    m_lock = millis() + WHITE_LIGHT_LOCK_TIME;
+  }
+  //if the behavior is locked, then return
+  else if (millis() < m_lock) {
+    return;
+  }
   //if the light level is below the threshold
-  if (!Clyde.white()->isOn() && light <= START_THRESHOLD) {
+  else if (light <= START_THRESHOLD) {
     //and the last time we checked it was above
     //then set the time until which we need to remain below threshold
     if (m_lastLight > START_THRESHOLD) {
         m_lock = millis() + THRESHOLD_LOCK_TIME;
     }
     //if we're ready for a sunset, and we reached the set time, go sunset
-    else if (m_ready && millis() > m_lock) {
+    else if (m_ready) {
         startSunset();
         m_ready = false;
     }
@@ -89,4 +97,6 @@ void CClydeAfraidOfTheDark::startSunset() {
     return;
   
   Clyde.setCycle(SUNSET, m_sunsetSteps, m_sunsetColors, m_sunsetIntervals, NO_LOOP);
+  Clyde.setPlayMode(PLAYMODE_SINGLE);
+  Clyde.play(SND_AU_CLAIR_DE_LA_LUNE);
 }

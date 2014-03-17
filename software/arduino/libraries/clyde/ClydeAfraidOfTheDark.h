@@ -26,9 +26,10 @@
 class CClydeAfraidOfTheDark : public CClydeModule {
   static const uint16_t ID_LOW = 1012;                /**< low limit of read identification value */
   static const uint16_t ID_HIGH = 1015;               /**< high limit of read identification value */
-  static const uint16_t START_THRESHOLD = 200;        /**< threshold to reach below to start the sunset cycle */
-  static const uint16_t RESET_THRESHOLD = 400;        /**< threshold to reach above to start checking to starting a new sunset cycle */
+  static const uint16_t START_THRESHOLD = 100;        /**< threshold to reach below to start the sunset cycle */
+  static const uint16_t RESET_THRESHOLD = 200;        /**< threshold to reach above to start checking to starting a new sunset cycle */
   static const uint16_t THRESHOLD_LOCK_TIME = 250;    /**< time in millis to stay beyond threshold to trigger */ //XXX this might not have to be so low with the final PCB, less noise
+  static const uint16_t WHITE_LIGHT_LOCK_TIME = 2000; /**< time in millis to lock after white light is on */
 
   uint32_t m_lock;        /**< time in millis until when we need to stay below threshold to trigger sunset */
   uint16_t m_lastLight;   /**< last detected light level */

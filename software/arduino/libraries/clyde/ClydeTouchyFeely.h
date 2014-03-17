@@ -40,7 +40,7 @@ class CClydeTouchyFeely : public CClydeModule {
   
   static const RGB SELECT_COLORS[];               /**< colors of the color select cycle */
   static const uint16_t SELECT_INTERVALS[];       /**< intervals of the color select cycle */
-  static const uint8_t SELECT_STEPS;          /**< steps in the color select cycle */
+  static const uint8_t SELECT_STEPS;              /**< steps in the color select cycle */
   
   MPR121 m_mpr121;          /**< interface to the mpr121 */
   uint8_t m_tickleCount;    /**< number of detected tickle touch events */

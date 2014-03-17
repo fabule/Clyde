@@ -28,6 +28,8 @@ CClyde Clyde;
 
 const float CClyde::CAmbientLight::SCALE_CONSTRAINT = 225.0f / 255.0f;
 
+SoftwareSerial CClyde::CMouth::mp3(CClyde::CMouth::RX_PIN, CClyde::CMouth::TX_PIN);
+
 CClyde::CClyde() {
   //init modules
   m_modules[0].module = NULL;
@@ -83,13 +85,13 @@ CClyde::CClyde() {
   memset((void*)&m_cycle.colors[0], 0, sizeof(RGB)*CAmbientCycle::MAX_CYCLE_LENGTH);
   memset((void*)&m_cycle.intervals[0], 0, sizeof(uint32_t)*CAmbientCycle::MAX_CYCLE_LENGTH);
   m_cycle.loop = NO_LOOP;
+  
+  m_mouth.detected = false;
+  m_mouth.waitingOpCode = OP_NONE;
+  m_mouth.lastCmdTime = 0;
 }
 
 void CClyde::begin() {
-  //init serial commands
-  m_sCmd.addCommand("SERIAL", Clyde.cmdSerial);
-  m_sCmd.addCommand("VERSION", Clyde.cmdVersion);
-
   //setup module pins
   pinMode(m_modules[0].dpin, INPUT);
   digitalWrite(m_modules[0].dpin, LOW);
@@ -108,11 +110,24 @@ void CClyde::begin() {
   pinMode(m_white.pin, OUTPUT);
   analogWrite(m_white.pin, m_white.brightness);
 
+  //setup mouth / mp3 shield
+  m_mouth.mp3.begin(9600);
+
+  pinMode(CMouth::SELECT_PIN, OUTPUT);
+  pinMode(CMouth::DETECT_PIN, INPUT);
+  pinMode(CMouth::RX_PIN, INPUT);
+  pinMode(CMouth::TX_PIN, OUTPUT);
+  
+  digitalWrite(CMouth::SELECT_PIN, HIGH);
+  
   //load parameters from eeprom
   m_eeprom.readAmbientColor(&m_ambient.savedColor);
-
+  
   //detect the personality modules
   detectPersonalities();
+  
+  //detect the loudmouth shield
+  detectMouth();
   
   //set default lights off
   setAmbient(RGB(0,0,0));
@@ -175,8 +190,11 @@ void CClyde::detectPersonalities() {
   }
 }
 
-void CClyde::readSerial() {
-  m_sCmd.readSerial();
+void CClyde::detectMouth() {
+  #ifdef CLYDE_DEBUG
+    Serial.println("Clyde: Trying to detect Loudmouth. Request set play mode: Single Loop Mode");
+  #endif
+  m_mouth.waitingOpCode = Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
 }
 
 void CClyde::updateEye() {
@@ -261,6 +279,9 @@ void CClyde::calibrateEye(uint16_t irValue) {
       setWhite(255);
       m_eye.calibrated = false;
       
+      setPlayMode(PLAYMODE_SINGLE);
+      play(SND_ERROR);
+      
       #ifdef CLYDE_DEBUG
       Serial.print("Clyde: eye uncalibrated. not enough IR detected, check circuit. ir = ");
       Serial.print(irAvg);
@@ -324,6 +345,9 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
         blink(RGB(255,0,0), 3, 200);
         setWhite(255);
         
+        setPlayMode(PLAYMODE_SINGLE);
+        play(SND_ERROR);
+      
         #ifdef CLYDE_DEBUG
         Serial.println("Clyde: eye long press detected. auto release.");
         #endif
@@ -349,6 +373,119 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
   }
 
   return false;
+}
+
+void CClyde::updateMouth() {
+  //detect the loudmouth shield at startup by waiting for mp3 player response
+  if (!m_mouth.detected) {
+    //only wait for a few seconds
+    if (m_mouth.waitingOpCode == OP_NONE) {
+      return;
+    }
+    else if (m_mouth.mp3.available() && PLAYMODE_SINGLE_CYCLE == m_mouth.mp3.read()) {
+      #ifdef CLYDE_DEBUG
+      Serial.println("Clyde: Loudmouth detected. Set play mode: Single Loop Mode.");
+      #endif
+      m_mouth.detected = true;
+    }
+    else if (m_mouth.lastCmdTime - millis() > CMouth::ACK_TIMEOUT) {
+      #ifdef CLYDE_DEBUG
+      Serial.println("Clyde: Loudmouth not detected. Set play mode timeout.");
+      #endif
+      m_mouth.waitingOpCode = OP_NONE;
+    }
+  }
+  else {
+    //TODO
+  }
+}
+
+EOpCode CClyde::setPlayMode(EPlayMode playmode)
+{
+  m_mouth.mp3.write(0x7E);
+  m_mouth.mp3.write(0x03);
+  m_mouth.mp3.write(OP_SET_PLAY_MODE);
+  m_mouth.mp3.write(playmode);
+  m_mouth.mp3.write(0x7E);
+  
+  m_mouth.lastCmdTime = millis();
+  
+  return OP_SET_PLAY_MODE;
+}
+
+EOpCode CClyde::play(uint16_t index)
+{
+  if (!m_mouth.detected) return OP_NONE;
+  
+  m_mouth.mp3.write(0x7E);
+  m_mouth.mp3.write(0x04);
+  m_mouth.mp3.write(OP_PLAY);
+  m_mouth.mp3.write((index >> 8) & 0xFF);
+  m_mouth.mp3.write(index & 0xFF);
+  m_mouth.mp3.write(0x7E);
+  
+  m_mouth.lastCmdTime = millis();
+  
+  return OP_PLAY;
+}
+
+EOpCode CClyde::playState()
+{
+  if (!m_mouth.detected) return OP_NONE;
+
+  m_mouth.mp3.write(0x7E);
+  m_mouth.mp3.write(0x02);
+  m_mouth.mp3.write(OP_PLAY_STATE);
+  m_mouth.mp3.write(0x7E);
+  
+  m_mouth.lastCmdTime = millis();
+  
+  return OP_PLAY_STATE;
+}
+
+EOpCode CClyde::setVolume(uint8_t volume)
+{
+  if (!m_mouth.detected) return OP_NONE;
+
+  if (volume > 31) volume = 31;
+
+  m_mouth.mp3.write(0x7E);
+  m_mouth.mp3.write(0x03);
+  m_mouth.mp3.write(OP_SET_VOLUME);
+  m_mouth.mp3.write(volume);
+  m_mouth.mp3.write(0x7E);
+  
+  m_mouth.lastCmdTime = millis();
+  
+  return OP_SET_VOLUME;
+}
+
+EOpCode CClyde::pause(void)
+{
+  if (!m_mouth.detected) return OP_NONE;
+
+  m_mouth.mp3.write(0x7E);
+  m_mouth.mp3.write(0x02);
+  m_mouth.mp3.write(OP_PAUSE);
+  m_mouth.mp3.write(0x7E);
+  
+  m_mouth.lastCmdTime = millis();
+  
+  return OP_PAUSE;
+}
+
+EOpCode CClyde::stop(void)
+{
+  if (!m_mouth.detected) return OP_NONE;
+
+  m_mouth.mp3.write(0x7E);
+  m_mouth.mp3.write(0x02);
+  m_mouth.mp3.write(OP_STOP);
+  m_mouth.mp3.write(0x7E);
+  
+  m_mouth.lastCmdTime = millis();
+  
+  return OP_PAUSE;
 }
 
 void CClyde::updateAmbientLight() {
@@ -447,10 +584,22 @@ void CClyde::fadeWhite(uint8_t b, float spd) {
 
 void CClyde::switchLights()
 { 
-  if (!m_white.isOn() && m_ambient.isOn()) fadeWhite(0, 0.1f);
-  else if (m_white.isOn() && m_ambient.isOn()) fadeAmbient(RGB(0,0,0), 0.5f);
-  else if (m_white.isOn() && !m_ambient.isOn()) fadeWhite(255, 0.3f);
-  else if (!m_white.isOn() && !m_ambient.isOn()) fadeAmbient(m_ambient.savedColor, 0.1f); 
+  if (!m_white.isOn() && m_ambient.isOn()) {
+    fadeWhite(0, 0.1f);
+  }
+  else if (m_white.isOn() && m_ambient.isOn()) {
+    fadeAmbient(RGB(0,0,0), 0.5f);
+  }
+  else if (m_white.isOn() && !m_ambient.isOn()) {
+    fadeWhite(255, 0.3f);
+    setPlayMode(PLAYMODE_SINGLE);
+    play(SND_OFF);
+  }
+  else if (!m_white.isOn() && !m_ambient.isOn()) {
+    fadeAmbient(m_ambient.savedColor, 0.1f);
+    setPlayMode(PLAYMODE_SINGLE);
+    play(SND_ON);
+  }
 }
 
 void CClyde::setCycle(ECycleType type, uint8_t steps, const RGB *colors, const uint8_t *intervals, ECycleLoop loop) {
@@ -564,6 +713,7 @@ void CClyde::updateCycleNextStep(uint32_t now) {
     else {
       m_cycle.type = OFF;
       setAmbient(m_cycle.colors[m_cycle.numSteps-1]);
+      stop();
       return;
     }
   }
@@ -595,33 +745,4 @@ void CClyde::speedUpCycle(uint32_t factor) {
   
   //jump cycle to next color
   cycleNextStep(millis());
-}
-
-//
-// Serial Commands
-//
-void CClyde::cmdSerial() {
-  char serial[7] = {0};
-  Clyde.eeprom()->readSerial(&serial[0]);  
-  sendSuccessResponse(serial);
-}
-
-void CClyde::cmdVersion() {
-  uint16_t version = 0;
-  Clyde.eeprom()->readVersion(&version);  
-  sendSuccessResponse(version);
-}
-
-void CClyde::sendSuccessResponse() {
-  Serial.println("OK");
-}
-
-void CClyde::sendSuccessResponse(String response) {
-  Serial.print("OK ");
-  Serial.println(response);
-}
-
-void CClyde::sendSuccessResponse(uint16_t response) {
-  Serial.print("OK ");
-  Serial.println(response);
 }
