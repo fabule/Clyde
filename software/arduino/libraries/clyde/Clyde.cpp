@@ -15,8 +15,14 @@
 */
 
 #include "Clyde.h"
-#include "ClydeAfraidOfTheDark.h"
-#include "ClydeTouchyFeely.h"
+
+#ifdef ENABLE_AFRAID_OF_THE_DARK
+  #include "ClydeAfraidOfTheDark.h"
+#endif 
+
+#ifdef ENABLE_TOUCHY_FEELY
+  #include "ClydeTouchyFeely.h"
+#endif
 
 #if ARDUINO >= 100
 #include "Arduino.h"
@@ -92,6 +98,10 @@ CClyde::CClyde() {
 }
 
 void CClyde::begin() {
+#ifdef CLYDE_DEBUG
+  delay(5000);
+#endif
+
   //setup module pins
   pinMode(m_modules[0].dpin, INPUT);
   digitalWrite(m_modules[0].dpin, LOW);
@@ -149,10 +159,14 @@ void CClyde::detectPersonalities() {
       pinMode(m_modules[j].dpin, INPUT);
       
       //check for each type of module
+      #ifdef ENABLE_AFRAID_OF_THE_DARK
       if (AfraidOfTheDark.id(idValue))
         newModule = &AfraidOfTheDark;
-      else if (TouchyFeely.id(idValue))
+      #endif
+      #ifdef ENABLE_TOUCHY_FEELY
+      if (TouchyFeely.id(idValue))
         newModule = &TouchyFeely;
+      #endif
         
       //if the detected module is different that last, then reset detection count
       //TODO: reverse this if block to check for equality first
@@ -275,7 +289,7 @@ void CClyde::calibrateEye(uint16_t irValue) {
     
     //check to make sure that there's enough IR emitted by the circuit
     if (irAvg > (uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A)) {
-      blink(RGB(255, 0, 0), 3, 200);
+      blink(RGB(255, 0, 0), 200, 200, 3);
       setWhite(255);
       m_eye.calibrated = false;
       
@@ -303,19 +317,19 @@ void CClyde::calibrateEye(uint16_t irValue) {
       //simple conversion from detected base ir to threshold
       //the less ir detected (higher value) the less difference required to trigger
       uint16_t newThreshold = irAvg * CEye::CALIB_FORMULA_A + CEye::CALIB_FORMULA_B;
-/*
-      #ifdef CLYDE_DEBUG
-        if (m_eye.irThreshold != newThreshold) {
-          Serial.print("Clyde: eye calibrated. threshold = ");
-          Serial.print(newThreshold);
-          Serial.print(", range = ");
-          Serial.print(m_eye.irMax - m_eye.irMin);
-          Serial.print(", noisy restarts = ");
-          Serial.println(restartCount);
-        }
-        restartCount = 0;
-      #endif      
-*/     
+
+      //#ifdef CLYDE_DEBUG
+      //  if (m_eye.irThreshold != newThreshold) {
+      //    Serial.print("Clyde: eye calibrated. threshold = ");
+      //    Serial.print(newThreshold);
+      //    Serial.print(", range = ");
+      //    Serial.print(m_eye.irMax - m_eye.irMin);
+      //    Serial.print(", noisy restarts = ");
+      //    Serial.println(restartCount);
+      //  }
+      //  restartCount = 0;
+      //#endif      
+     
       m_eye.irThreshold = newThreshold;
     }
 
@@ -332,6 +346,11 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
   //require that IR is calibrated
   if (!m_eye.calibrated || millis() < m_eye.pressLock) return false;
 
+  //#ifdef CLYDE_DEBUG
+  //Serial.print("Clyde: IR = ");
+  //Serial.println(irValue);
+  //#endif
+  
   //if the eye press is detected enough time, trigger press event
   if (m_eye.pressedCount == CEye::PRESS_COUNT_THRESHOLD) {
     //and we detect that's it's still pressed,
@@ -342,7 +361,7 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
       if (millis() > m_eye.pressedStart+3000) {
         m_eye.pressedCount = 0;
         m_eye.calibLock = m_eye.pressLock = millis() + 1500;
-        blink(RGB(255,0,0), 3, 200);
+        blink(RGB(255,0,0), 200, 200, 3);
         setWhite(255);
         
         setPlayMode(PLAYMODE_SINGLE);
@@ -651,9 +670,12 @@ void CClyde::stopCycle() {  //TODO should this be a function pointer set when st
   }  
 }
 
-void CClyde::blink(const RGB& rgb, uint8_t numBlinks, uint8_t msInterval) {
+void CClyde::blink(const RGB& rgb, uint32_t onDuration, uint32_t offDuration, uint8_t numBlinks) {
   //calculate number of steps needed in the cycle
   uint8_t steps = numBlinks*2 + 1;
+  
+  //if numBlinks was zero (infinite loop), make space for on/off
+  if (steps == 1) steps = 2;
   
   //check number of step limit
   if (steps > CAmbientCycle::MAX_CYCLE_LENGTH)
@@ -661,15 +683,19 @@ void CClyde::blink(const RGB& rgb, uint8_t numBlinks, uint8_t msInterval) {
   
   //set blinks color
   RGB colors[steps];
-  uint8_t intervals[steps];
+  uint32_t intervals[steps];
   
   for(int i = 0; i < steps; i++) {
-    if (i%2==1)
-      colors[i] = rgb;  
-    intervals[i] = msInterval;
+    if (i%2==1) {
+      colors[i] = rgb;
+      intervals[i] = offDuration;
+    }
+    else {
+      intervals[i] = onDuration;
+    }
   }
   
-  setCycle(BLINK, steps, &colors[0], &intervals[0], NO_LOOP);
+  setCycle(BLINK, steps, &colors[0], &intervals[0], numBlinks==0?LOOP:NO_LOOP);
 }
 
 void CClyde::updateCycle() {

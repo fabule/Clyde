@@ -17,6 +17,8 @@
 #include "ClydeTouchyFeely.h"
 #include "I2Cdev.h"
 
+#ifdef ENABLE_TOUCHY_FEELY
+
 CClydeTouchyFeely TouchyFeely;
 
 const RGB CClydeTouchyFeely::SELECT_COLORS[] = {RGB(255,0,0), RGB(255,255,0), RGB(0,255,0), RGB(0,255,255), RGB(0,0,255), RGB(255,0,255), RGB(255,255,255)};
@@ -24,7 +26,15 @@ const uint16_t CClydeTouchyFeely::SELECT_INTERVALS[] = {1000, 1000, 1000, 1000, 
 const uint8_t CClydeTouchyFeely::SELECT_STEPS = 7;
   
 CClydeTouchyFeely::CClydeTouchyFeely()
-  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR), m_tickleCount(0), m_firstTickle(0), m_lastStopStep(0), m_touchStart(0) {
+  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR) {
+  
+  m_touchedHandler = NULL;
+  m_releasedHandler = NULL;
+  m_touchStart = 0;
+  m_lastStopStep = 0;
+  m_colorSelectEnabled = true;
+  m_tickleCount = 0;
+  m_firstTickle = 0;
 }
 
 bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
@@ -49,11 +59,20 @@ bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
 
 void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   //only active when the ambient light is on
-  if (!Clyde.ambient()->isOn()) return;
+  if (m_colorSelectEnabled && !Clyde.ambient()->isOn()) return;
 
-  //start color select after a few millis to protect from false positive
-  if ((m_touchStatus & 0x0FFF) && !Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH) && (millis()-m_touchStart > 100))
-    startColorSelect();
+  //trigger touch event after a few millis to protect from false positive
+  if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 25)) {
+    //start color selection only if current cycle isn't laugh or select
+    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH))
+      startColorSelect();
+    
+    //call touched handler if any
+    if (m_touchedHandler) m_touchedHandler();
+    
+    //reset status to only call this once
+    m_touchStatus = 0;
+  }
 
   //check for mpr121 interrupt
   if (digitalRead(dpin))
@@ -86,6 +105,10 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   else if (!(m_touchStatus & 0x0FFF)) {
     tickleCheck();
   }
+  
+  //call released handler if it is set and no legs are touched
+  if (m_releasedHandler && !(m_touchStatus & 0x0FFF))
+    m_releasedHandler();
 }
 
 void CClydeTouchyFeely::tickleCheck() {
@@ -157,6 +180,8 @@ void CClydeTouchyFeely::laugh() {
 }
 
 void CClydeTouchyFeely::startColorSelect() {
+  if (!m_colorSelectEnabled) return;
+
   #ifdef CLYDE_DEBUG
   Serial.println("Clyde: touchy-feely color selection cycle STARTED");
   #endif
@@ -169,6 +194,8 @@ void CClydeTouchyFeely::startColorSelect() {
 }
 
 void CClydeTouchyFeely::stopColorSelect() {
+  if (!m_colorSelectEnabled) return;
+
   #ifdef CLYDE_DEBUG
   Serial.println("Clyde: touchy-feely color selection cycle STOPPED");
   #endif
@@ -183,6 +210,7 @@ void CClydeTouchyFeely::stopColorSelect() {
   Clyde.stop();
 }
 
+/*
 void CClydeTouchyFeely::debugAutoConfig() {
   //OOR
   uint8_t buf;
@@ -221,3 +249,6 @@ void CClydeTouchyFeely::debugAutoConfig() {
   Serial.print(": ");
   Serial.println(buf & 0b111);
 }
+*/
+
+#endif

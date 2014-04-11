@@ -20,6 +20,9 @@
 #include <stdint.h>
 #include <SoftwareSerial.h>
 
+#define ENABLE_AFRAID_OF_THE_DARK
+#define ENABLE_TOUCHY_FEELY
+
 #include "colortypes.h"
 #include "ClydeEEPROM.h"
 #include "ClydeModule.h"
@@ -345,7 +348,7 @@ public:
   /**
    * Make the ambient light blink.
    */
-  void blink(const RGB& rgb, uint8_t numBlinks, uint8_t msInterval);
+  void blink(const RGB& rgb, uint32_t onDuration, uint32_t offDuration, uint8_t numBlinks);
   
   /**
    * Set the loudmouth mp3 player play mode.

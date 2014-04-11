@@ -42,15 +42,19 @@ class CClydeTouchyFeely : public CClydeModule {
   static const uint16_t SELECT_INTERVALS[];       /**< intervals of the color select cycle */
   static const uint8_t SELECT_STEPS;              /**< steps in the color select cycle */
   
-  MPR121 m_mpr121;          /**< interface to the mpr121 */
-  uint8_t m_tickleCount;    /**< number of detected tickle touch events */
-  uint32_t m_firstTickle;   /**< time in millis we detected the first tickle tap */
-  uint8_t m_lastStopStep;   /**< step index when the color select cycle was stopped. */
-  uint16_t m_touchStatus;   /**< current status of touch electrodes. */
-  uint32_t m_touchStart;    /**< time in millis when the active touch started. */
+  MPR121 m_mpr121;           /**< interface to the mpr121 */
+  bool m_colorSelectEnabled; /**< color selection enabled flag */
+  uint8_t m_tickleCount;     /**< number of detected tickle touch events */
+  uint32_t m_firstTickle;    /**< time in millis we detected the first tickle tap */
+  uint8_t m_lastStopStep;    /**< step index when the color select cycle was stopped. */
+  uint16_t m_touchStatus;    /**< current status of touch electrodes. */
+  uint32_t m_touchStart;     /**< time in millis when the active touch started. */
   
   RGB m_laughColors[CClyde::CAmbientCycle::MAX_CYCLE_LENGTH];           /**< colors of the laugh cycle */   //this could be in the main class
   uint16_t m_laughIntervals[CClyde::CAmbientCycle::MAX_CYCLE_LENGTH];   /**< intervals of the laugh cycle */
+  
+  void (*m_touchedHandler)();
+  void (*m_releasedHandler)();
   
 public:  
   /** Constructor. */
@@ -60,11 +64,31 @@ public:
    * Initialize the module with specified analog and digital pins.
    */  
   bool init(uint8_t apin, uint8_t dpin);
+  
+  /**
+   * Disable color selection on touch.
+   */ 
+  void disableColorSelect() { m_colorSelectEnabled = false; }
+  
+  /**
+   * Enable color selection on touch.
+   */ 
+  void enableColorSelect() { m_colorSelectEnabled = true; }
 
   /**
    * Update the module using the specified analog and digital pins.
    */  
   void update(uint8_t apin, uint8_t dpin);
+  
+  /**
+   * Set the touched handler.
+   */
+  void setTouchedHandler(void(*function)()) { m_touchedHandler = function; }
+  
+  /**
+   * Set the released handler.
+   */
+  void setReleasedHandler(void(*function)()) { m_releasedHandler = function; }
   
 private:
   /** Check if the detected touch is tickling. */

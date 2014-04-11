@@ -16,6 +16,8 @@
 
 #include "ClydeAfraidOfTheDark.h"
 
+#ifdef ENABLE_AFRAID_OF_THE_DARK
+
 #if ARDUINO >= 100
 #include "Arduino.h"
 #else
@@ -53,6 +55,11 @@ bool CClydeAfraidOfTheDark::init(uint8_t apin, uint8_t dpin) {
 
 void CClydeAfraidOfTheDark::update(uint8_t apin, uint8_t dpin) {
   unsigned short light = analogRead(apin);  
+  
+  //#ifdef CLYDE_DEBUG
+  //Serial.print("Clyde: light level = ");
+  //Serial.println(light);
+  //#endif
   
   //if the white light is on, then disable
   if (Clyde.white()->isOn()) {
@@ -100,3 +107,5 @@ void CClydeAfraidOfTheDark::startSunset() {
   Clyde.setPlayMode(PLAYMODE_SINGLE);
   Clyde.play(SND_AU_CLAIR_DE_LA_LUNE);
 }
+
+#endif
