@@ -3,6 +3,7 @@
 #include <Clyde.h>
 #include <SerialCommand.h>
 #include <SoftwareSerial.h>
+#include <MPR121.h>
 
 SerialCommand sCmd;
 

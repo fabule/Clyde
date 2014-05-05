@@ -27,7 +27,6 @@
 #include "ClydeEEPROM.h"
 #include "ClydeModule.h"
 
-//not implemented yet
 //#define CLYDE_DEBUG
 
 /**
