@@ -199,9 +199,9 @@ bool MPR121::getTouchStatus(uint8_t channel) {
 uint16_t MPR121::getTouchStatus() {
   uint16_t statusBuf;
   uint8_t buf;
-  I2Cdev::readByte(m_devAddr, ELE0_ELE7_TOUCH_STATUS, &buf, I2Cdev::readTimeout, false);
-  statusBuf = buf;
   I2Cdev::readByte(m_devAddr, ELE8_ELE11_ELEPROX_TOUCH_STATUS, &buf, I2Cdev::readTimeout, false);
-  statusBuf += (buf << 8);
+  statusBuf = buf << 8;
+  I2Cdev::readByte(m_devAddr, ELE0_ELE7_TOUCH_STATUS, &buf, I2Cdev::readTimeout, false);
+  statusBuf += buf;
   return statusBuf;
 }

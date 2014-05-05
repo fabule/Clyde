@@ -179,7 +179,7 @@ THE SOFTWARE.
 #define AUTO_CONFIG_TARGET_LEVEL 0x7F
 
 // Other Constants
-#define TOUCH_THRESHOLD   0x0F
+#define TOUCH_THRESHOLD   0x0F //0x06 for touch rig
 #define RELEASE_THRESHOLD 0x0A
 #define NUM_CHANNELS      12
 
