@@ -179,7 +179,7 @@ THE SOFTWARE.
 #define AUTO_CONFIG_TARGET_LEVEL 0x7F
 
 // Other Constants
-#define TOUCH_THRESHOLD   0x0F //0x06 for touch rig
+#define TOUCH_THRESHOLD   0x0F
 #define RELEASE_THRESHOLD 0x0A
 #define NUM_CHANNELS      12
 
@@ -194,7 +194,7 @@ class MPR121
   
     // constructor
     // takes a 7-b I2C address to use (0x5A by default, assumes addr pin grounded)
-    MPR121(uint8_t address = MPR121_DEFAULT_ADDRESS);
+    MPR121(uint8_t address = MPR121_DEFAULT_ADDRESS, uint8_t touchThreshold = TOUCH_THRESHOLD, uint8_t releaseThreshold = RELEASE_THRESHOLD);
 
     // write the configuration registers in accordance with the datasheet and app note 3944
     void initialize(bool autoconfig = false);
@@ -209,6 +209,8 @@ class MPR121
     
   private:
     uint8_t m_devAddr; // contains the I2C address of the device
+    uint8_t m_touchThreshold;
+    uint8_t m_releaseThreshold;
     bool m_prevTouchStatus[NUM_CHANNELS];
     
 };

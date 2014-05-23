@@ -34,9 +34,6 @@ struct RGB {
     b = a.b;
     return *this;
   }
-  
-  //void set(uint8_t nr, uint8_t ng, uint8_t nb) { r = nr; g = ng; b = nb; }
-  //void set(const RGB &c) { r = c.r; g = c.g; b = c.b; }
 };
 
 /**
@@ -64,9 +61,6 @@ struct RGBf {
     b = a.b;
     return *this;
   }
-  
-  //void set(float nr, float ng, float nb) { r = nr; g = ng; b = nb; }
-  //void set(const RGBf &c) { r = c.r; g = c.g; b = c.b; }
 };
 
 #endif

@@ -32,8 +32,8 @@
  */
 class CClydeTouchyFeely : public CClydeModule {
   static const uint8_t DEVICE_ADDR = 0x5A;        /**< i2c address of mpr121 */
-  static const uint16_t ID_LOW = 1001;            /**< low limit of read identification value */
-  static const uint16_t ID_HIGH = 1007;           /**< high limit of read identification value */
+  static const uint16_t ID_LOW = 1000;            /**< low limit of read identification value */
+  static const uint16_t ID_HIGH = 1010;           /**< high limit of read identification value */
 
   static const uint32_t TICKLE_INTERVAL = 2500;   /**< max time in millis between touch events to trigger laugh */
   static const uint8_t TICKLE_REPEAT = 4;         /**< number of consecutive touch events to trigger laugh */

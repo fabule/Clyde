@@ -27,7 +27,7 @@
 #include "ClydeEEPROM.h"
 #include "ClydeModule.h"
 
-//#define CLYDE_DEBUG
+#define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.
@@ -155,8 +155,8 @@ public:
    * The squishy eye.
    */
   struct CEye {
-    static const uint16_t CALIB_BLINK_INTERVAL = 3000;  /**< Time between white light blinks during first calibration in millis. */
-    static const uint16_t CALIB_BLINK_DURATION = 100;   /**< Time of blinks during first calibration in millis. */
+    //static const uint16_t CALIB_BLINK_INTERVAL = 3000;  /**< Time between white light blinks during first calibration in millis. */
+    //static const uint16_t CALIB_BLINK_DURATION = 100;   /**< Time of blinks during first calibration in millis. */
     static const uint8_t CALIB_SAMPLE_INTERVAL = 10;    /**< Time between calibration samples in millis. */
     static const uint8_t CALIB_MAX_CHANGE = 40;         /**< Maximum value range accepted for calibration. */
     static const uint8_t CALIB_NUM_REPEATS = 125;       /**< Numbers of samples to check for calibration. */
@@ -170,8 +170,8 @@ public:
     uint8_t pin;              /**< Analog signal pin of the IR sensor. */
     bool onceCalibrated;      /**< Flag to track the first time we calibrate. */
     bool calibrated;          /**< Flag to track if the eye is currently calibrated. */
-    bool calibBlink;          /**< Blink status during the first calibration. On/Off. */
-    uint32_t nextCalibBlink;  /**< Next time to change the first calibration blink status in millis. */
+    //bool calibBlink;          /**< Blink status during the first calibration. On/Off. */
+    //uint32_t nextCalibBlink;  /**< Next time to change the first calibration blink status in millis. */
     uint32_t calibLock;       /**< Time until when the calibration can't not happen. */
     uint8_t calibCount;       /**< Number of time we read a calibration value within range in a row. */
     uint16_t irMin;           /**< Minimum sensor value read. */

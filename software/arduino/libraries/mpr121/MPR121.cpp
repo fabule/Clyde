@@ -36,8 +36,8 @@ THE SOFTWARE.
 #include "MPR121.h"
 #include "I2Cdev.h"
 
-MPR121::MPR121(uint8_t address) :
-  m_devAddr(address)
+MPR121::MPR121(uint8_t address, uint8_t touchThreshold, uint8_t releaseThreshold) :
+  m_devAddr(address), m_touchThreshold(touchThreshold), m_releaseThreshold(releaseThreshold)
 {
 }
 
@@ -96,33 +96,33 @@ void MPR121::initialize(bool autoconfig)
   //   very large electrodes the reverse is true.  One easy method is 
   //   to view the deltas actually seen in a system and set the touch 
   //   at 80% and release at 70% of delta for good performance.
-  I2Cdev::writeByte(m_devAddr, ELE0_TOUCH_THRESHOLD,   TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE0_RELEASE_THRESHOLD, RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE1_TOUCH_THRESHOLD,   TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE1_RELEASE_THRESHOLD, RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE2_TOUCH_THRESHOLD,   TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE2_RELEASE_THRESHOLD, RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE3_TOUCH_THRESHOLD,   TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE3_RELEASE_THRESHOLD, RELEASE_THRESHOLD);
+  I2Cdev::writeByte(m_devAddr, ELE0_TOUCH_THRESHOLD,   m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE0_RELEASE_THRESHOLD, m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE1_TOUCH_THRESHOLD,   m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE1_RELEASE_THRESHOLD, m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE2_TOUCH_THRESHOLD,   m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE2_RELEASE_THRESHOLD, m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE3_TOUCH_THRESHOLD,   m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE3_RELEASE_THRESHOLD, m_releaseThreshold);
 
   // TODO: enable setting these channels to capsense or GPIO
   // for now they are all capsense
-  I2Cdev::writeByte(m_devAddr, ELE4_TOUCH_THRESHOLD,    TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE4_RELEASE_THRESHOLD,  RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE5_TOUCH_THRESHOLD,    TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE5_RELEASE_THRESHOLD,  RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE6_TOUCH_THRESHOLD,    TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE6_RELEASE_THRESHOLD,  RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE7_TOUCH_THRESHOLD,    TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE7_RELEASE_THRESHOLD,  RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE8_TOUCH_THRESHOLD,    TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE8_RELEASE_THRESHOLD,  RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE9_TOUCH_THRESHOLD,    TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE9_RELEASE_THRESHOLD,  RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE10_TOUCH_THRESHOLD,   TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE10_RELEASE_THRESHOLD, RELEASE_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE11_TOUCH_THRESHOLD,   TOUCH_THRESHOLD);
-  I2Cdev::writeByte(m_devAddr, ELE11_RELEASE_THRESHOLD, RELEASE_THRESHOLD);
+  I2Cdev::writeByte(m_devAddr, ELE4_TOUCH_THRESHOLD,    m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE4_RELEASE_THRESHOLD,  m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE5_TOUCH_THRESHOLD,    m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE5_RELEASE_THRESHOLD,  m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE6_TOUCH_THRESHOLD,    m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE6_RELEASE_THRESHOLD,  m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE7_TOUCH_THRESHOLD,    m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE7_RELEASE_THRESHOLD,  m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE8_TOUCH_THRESHOLD,    m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE8_RELEASE_THRESHOLD,  m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE9_TOUCH_THRESHOLD,    m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE9_RELEASE_THRESHOLD,  m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE10_TOUCH_THRESHOLD,   m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE10_RELEASE_THRESHOLD, m_releaseThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE11_TOUCH_THRESHOLD,   m_touchThreshold);
+  I2Cdev::writeByte(m_devAddr, ELE11_RELEASE_THRESHOLD, m_releaseThreshold);
 
   // Section D
   // Description:

@@ -45,7 +45,7 @@ bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
     return false;
   }
   
-  m_mpr121.initialize(false);
+  m_mpr121.initialize(true);
  
   pinMode(dpin, INPUT);
   digitalWrite(dpin, LOW);
@@ -62,10 +62,15 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   if (m_colorSelectEnabled && !Clyde.ambient()->isOn()) return;
 
   //trigger touch event after a few millis to protect from false positive
-  if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 25)) {
+  if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 1000)) {
     //start color selection only if current cycle isn't laugh or select
-    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH))
+    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH)) {
       startColorSelect();
+    
+      #ifdef CLYDE_DEBUG
+      Serial.println("Clyde: Touchy-Feely detected a touch (2).");
+      #endif
+    }
     
     //call touched handler if any
     if (m_touchedHandler) m_touchedHandler();
@@ -101,7 +106,7 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
       tickleCheck();
     }
   }
-  //if clyde is laughing, check to tickles to see if it needs to continue
+  //if clyde is laughing, check for tickles to see if it needs to continue
   else if (!(m_touchStatus & 0x0FFF)) {
     tickleCheck();
   }

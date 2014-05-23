@@ -68,8 +68,8 @@ CClyde::CClyde() {
   m_eye.pin = 0;
   m_eye.onceCalibrated = false;
   m_eye.calibrated = false;
-  m_eye.calibBlink = true;
-  m_eye.nextCalibBlink = 3000;
+  //m_eye.calibBlink = true;
+  //m_eye.nextCalibBlink = 3000;
   m_eye.calibLock = 0;
   m_eye.calibCount = 0;
   m_eye.irMin = 1025;
@@ -158,6 +158,8 @@ void CClyde::detectPersonalities() {
       uint16_t idValue = analogRead(m_modules[j].apin);
       pinMode(m_modules[j].dpin, INPUT);
       
+      Serial.println(idValue);
+      
       //check for each type of module
       #ifdef ENABLE_AFRAID_OF_THE_DARK
       if (AfraidOfTheDark.id(idValue))
@@ -244,13 +246,13 @@ void CClyde::calibrateEye(uint16_t irValue) {
   if (millis() < m_eye.calibLock) return;
   
   //if IR has never been calibrated, blink white light until it is
-  if(!m_eye.onceCalibrated) {
-    if (millis() > m_eye.nextCalibBlink) {
-      m_eye.calibBlink = !m_eye.calibBlink;
-      setWhite(m_eye.calibBlink ? 0 : 255);
-      m_eye.nextCalibBlink += m_eye.calibBlink ? CEye::CALIB_BLINK_DURATION : CEye::CALIB_BLINK_INTERVAL;
-    }
-  }
+  //if(!m_eye.onceCalibrated) {
+  //  if (millis() > m_eye.nextCalibBlink) {
+  //    m_eye.calibBlink = !m_eye.calibBlink;
+  //    setWhite(m_eye.calibBlink ? 0 : 255);
+  //    m_eye.nextCalibBlink += m_eye.calibBlink ? CEye::CALIB_BLINK_DURATION : CEye::CALIB_BLINK_INTERVAL;
+  //  }
+  //}
   
   //if the eye is pressed, don't try to calibrate
   if (m_eye.pressedCount > 0) return;
@@ -287,25 +289,9 @@ void CClyde::calibrateEye(uint16_t irValue) {
     //average ir reading
     uint16_t irAvg = (m_eye.irMin + m_eye.irMax) / 2;
     
-    //check to make sure that there's enough IR emitted by the circuit
-    if (irAvg > (uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A)) {
-      blink(RGB(255, 0, 0), 200, 200, 3);
-      setWhite(255);
-      m_eye.calibrated = false;
-      
-      setPlayMode(PLAYMODE_SINGLE);
-      play(SND_ERROR);
-      
-      #ifdef CLYDE_DEBUG
-      Serial.print("Clyde: eye uncalibrated. not enough IR detected, check circuit. ir = ");
-      Serial.print(irAvg);
-      Serial.print(", minimum = ");
-      Serial.println((uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A));
-      #endif
-    }
     //only calibrate if the threshold is above a certain limit
     //if not it's too unpredictable (e.g. the sun is shining on it)
-    else {
+    if (irAvg < (uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A)) {
       //if the eye was not calibrated, turn on ambient light to show feedback
       if (!m_eye.calibrated)
         fadeAmbient(m_ambient.savedColor, 0.1f);
@@ -332,7 +318,24 @@ void CClyde::calibrateEye(uint16_t irValue) {
      
       m_eye.irThreshold = newThreshold;
     }
-
+    //if there's NOT enough IR emitted by the circuit to recalibrate, then set to recalibrate
+    else if (m_eye.calibrated) {
+      //blink(RGB(255, 0, 0), 200, 200, 3);
+      setAmbient(RGB(0, 0, 0));
+      setWhite(255);
+      m_eye.calibrated = false;
+      
+      //setPlayMode(PLAYMODE_SINGLE);
+      //play(SND_ERROR);
+      
+      #ifdef CLYDE_DEBUG
+      Serial.print("Clyde: eye uncalibrated. not enough IR detected, check circuit. ir = ");
+      Serial.print(irAvg);
+      Serial.print(", minimum = ");
+      Serial.println((uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A));
+      #endif
+    }
+    
     //reset values
     m_eye.calibCount = 0;
     m_eye.irMin = 1025;
@@ -361,7 +364,8 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
       if (millis() > m_eye.pressedStart+3000) {
         m_eye.pressedCount = 0;
         m_eye.calibLock = m_eye.pressLock = millis() + 1500;
-        blink(RGB(255,0,0), 200, 200, 3);
+        //blink(RGB(255,0,0), 200, 200, 3);
+        setAmbient(RGB(0, 0, 0));
         setWhite(255);
         
         setPlayMode(PLAYMODE_SINGLE);
