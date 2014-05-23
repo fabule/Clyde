@@ -394,7 +394,7 @@ AVRDUDE_PORT = usb
 #AVRDUDE_VERBOSE = -v -v
 
 # Fuses and lock bits to set before and after programming the flash.
-AVRDUDE_PRE_FLAGS_NEW = -U lock:w:0x3f:m -e -B2 
+AVRDUDE_PRE_FLAGS_NEW = -U lock:w:0x3f:m -e -B2 -v
 AVRDUDE_PRE_FLAGS = -U lock:w:0x3f:m -e -B1
 AVRDUDE_POST_FLAGS = -U lfuse:w:0xff:m -U hfuse:w:0xd0:m -U efuse:w:0xcb:m -U lock:w:0x2f:m
 AVRDUDE_MCU = m32u4
@@ -563,13 +563,6 @@ gccversion :
 program_new:
 	@echo First pass: slow \(bitclock=10ms\)
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_PRE_FLAGS_NEW)
-	@sleep 1
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$(TARGET)-Clyde.hex -U flash:w:ClydeFirmware.cpp.hex
-	@sleep 1
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_POST_FLAGS)
-	@sleep 1
-	@echo Second pass: fast \(bitclock=1ms\)
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_PRE_FLAGS)
 	@sleep 1
 	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$(TARGET)-Clyde.hex -U flash:w:ClydeFirmware.cpp.hex
 	@sleep 1
