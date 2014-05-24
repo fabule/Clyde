@@ -87,6 +87,10 @@ bool CClydeEEPROM::writeSunsetCycle(uint8_t steps, RGB *colors, uint32_t *interv
   uint16_t addr = SUNSET_ADDR;
   
   //write sunset cycle
+#ifdef CLYDE_DEBUG
+    Serial.print("Sunset cycle steps: ");
+    Serial.println(steps);
+#endif
   EEPROM.write(addr, steps);
   
   addr++;
@@ -114,6 +118,10 @@ bool CClydeEEPROM::readSunsetCycle(uint8_t* steps, RGB *colors, unsigned long *i
   
   //read sunset cycle
   uint8_t s = EEPROM.read(sunsetAddr);
+#ifdef CLYDE_DEBUG
+    Serial.print("EEPROM: s=");
+    Serial.println(s);
+#endif
   
   //make sure that we don't read a cycle with more steps than we have space for
   if (s > CClyde::CAmbientCycle::MAX_CYCLE_LENGTH)
@@ -151,9 +159,11 @@ void CClydeEEPROM::reset() {
   
   //write the default sunset cycle
   //TODO: move values to somewhere more obvious, like top of ClydeAfraidOfTheDark.h
-  const uint8_t sunsetSteps = 5;
-  RGB sunsetColors[sunsetSteps] = {RGB(255, 58, 213),  RGB(255, 145, 51),  RGB(0, 0, 0),  RGB(203, 255, 45),  RGB(0, 0, 0)};
-  uint32_t sunsetIntervals[sunsetSteps] = {2000, 360000, 360000, 100, 100};
+    const uint8_t sunsetSteps = 9;//5;
+    RGB sunsetColors[sunsetSteps] = {RGB(255, 180, 0), RGB(255, 0, 0), RGB(0, 255, 255), RGB(0, 0, 255), RGB(0, 0, 0), RGB(0, 0, 180), RGB(0, 0, 0), RGB(0, 0, 125), RGB(0, 0, 0)};
+    uint32_t sunsetIntervals[sunsetSteps] = {500, 10000, 5000, 5000, 3000, 2000, 1500, 1000, 1000};
+  //RGB sunsetColors[sunsetSteps] = {RGB(255, 58, 213),  RGB(255, 145, 51),  RGB(0, 0, 0),  RGB(203, 255, 45),  RGB(0, 0, 0)};
+  //uint32_t sunsetIntervals[sunsetSteps] = {2000, 360000, 360000, 100, 100};
   
   clearSunsetCycle();
   writeSunsetCycle(sunsetSteps, &sunsetColors[0], &sunsetIntervals[0]);

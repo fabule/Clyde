@@ -24,8 +24,8 @@
  * The Afraid of the Dark personality module.
  */
 class CClydeAfraidOfTheDark : public CClydeModule {
-  static const uint16_t ID_LOW = 902;                /**< low limit of read identification value */
-  static const uint16_t ID_HIGH = 905;               /**< high limit of read identification value */
+  static const uint16_t ID_LOW = 908;                /**< low limit of read identification value. should be 902 */
+  static const uint16_t ID_HIGH = 920;               /**< high limit of read identification value. should be 905 */
   static const uint16_t START_THRESHOLD = 100;        /**< threshold to reach below to start the sunset cycle */
   static const uint16_t RESET_THRESHOLD = 200;        /**< threshold to reach above to start checking to starting a new sunset cycle */
   static const uint16_t THRESHOLD_LOCK_TIME = 250;    /**< time in millis to stay beyond threshold to trigger */ //XXX this might not have to be so low with the final PCB, less noise

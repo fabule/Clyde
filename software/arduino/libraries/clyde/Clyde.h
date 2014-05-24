@@ -27,7 +27,7 @@
 #include "ClydeEEPROM.h"
 #include "ClydeModule.h"
 
-//#define CLYDE_DEBUG
+#define CLYDE_DEBUG
 
 /**
  * Enum types of ambient color cycles.
@@ -158,8 +158,8 @@ public:
     static const uint16_t CALIB_BLINK_INTERVAL = 3000;  /**< Time between white light blinks during first calibration in millis. */
     static const uint16_t CALIB_BLINK_DURATION = 100;   /**< Time of blinks during first calibration in millis. */
     static const uint8_t CALIB_SAMPLE_INTERVAL = 10;    /**< Time between calibration samples in millis. */
-    static const uint8_t CALIB_MAX_CHANGE = 40;         /**< Maximum value range accepted for calibration. */
-    static const uint8_t CALIB_NUM_REPEATS = 125;       /**< Numbers of samples to check for calibration. */
+    static const uint8_t CALIB_MAX_CHANGE = 80;         /**< Maximum value range accepted for calibration. Normally 40 */
+    static const uint8_t CALIB_NUM_REPEATS = 100;       /**< Numbers of samples to check for calibration. Normally 125 */
     static const uint16_t CALIB_IR_BASE = 610;          /**< Base IR reading without any IR from outside. */
     static const float CALIB_FORMULA_A = 0.5;           /**< Multiplier for calibration formula. */
     static const uint16_t CALIB_FORMULA_B = 450;        /**< Base for calibration formula. */

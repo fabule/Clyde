@@ -157,6 +157,13 @@ void CClyde::detectPersonalities() {
       digitalWrite(m_modules[j].dpin, HIGH);
       uint16_t idValue = analogRead(m_modules[j].apin);
       pinMode(m_modules[j].dpin, INPUT);
+        
+      #ifdef CLYDE_DEBUG
+        Serial.print("Module ");
+        Serial.print(j+1);
+        Serial.print(": ");
+        Serial.print(idValue);
+      #endif
       
       //check for each type of module
       #ifdef ENABLE_AFRAID_OF_THE_DARK
@@ -214,6 +221,11 @@ void CClyde::detectMouth() {
 void CClyde::updateEye() {
   //read IR value
   uint16_t irValue = analogRead(m_eye.pin);
+    
+  //#ifdef CLYDE_DEBUG
+    //Serial.print("IR value =");
+    //Serial.println(irValue);
+  //#endif
 
   //calibrated the eye's IR sensor
   calibrateEye(irValue);
@@ -221,7 +233,8 @@ void CClyde::updateEye() {
   //if the eye was pressed
   if (wasEyePressed(irValue)) {
     #ifdef CLYDE_DEBUG
-      Serial.print("Clyde: eye was pressed.");
+      Serial.print("Clyde: eye was pressed. IR Value was ");
+      Serial.print(irValue);
       if (m_cycle.isOn()) Serial.println(" stopped cycle.");
       else Serial.println(" switched lights. ");
     #endif  
@@ -238,6 +251,7 @@ void CClyde::updateEye() {
 void CClyde::calibrateEye(uint16_t irValue) {
   #ifdef CLYDE_DEBUG
     static int restartCount = 0;
+    //Serial.println("Starting calibration");
   #endif
   
   //check if calibration was locked
@@ -270,6 +284,7 @@ void CClyde::calibrateEye(uint16_t irValue) {
     m_eye.irMin = m_eye.irMax = irValue;
     
     #ifdef CLYDE_DEBUG
+      Serial.println("IR diff is too high. Restarting count.");
       restartCount++;
     #endif
   }
@@ -318,17 +333,17 @@ void CClyde::calibrateEye(uint16_t irValue) {
       //the less ir detected (higher value) the less difference required to trigger
       uint16_t newThreshold = irAvg * CEye::CALIB_FORMULA_A + CEye::CALIB_FORMULA_B;
 
-      //#ifdef CLYDE_DEBUG
-      //  if (m_eye.irThreshold != newThreshold) {
-      //    Serial.print("Clyde: eye calibrated. threshold = ");
-      //    Serial.print(newThreshold);
-      //    Serial.print(", range = ");
-      //    Serial.print(m_eye.irMax - m_eye.irMin);
-      //    Serial.print(", noisy restarts = ");
-      //    Serial.println(restartCount);
-      //  }
-      //  restartCount = 0;
-      //#endif      
+      /*#ifdef CLYDE_DEBUG
+        if (m_eye.irThreshold != newThreshold) {
+          Serial.print("Clyde: eye calibrated. threshold = ");
+          Serial.print(newThreshold);
+          Serial.print(", range = ");
+          Serial.print(m_eye.irMax - m_eye.irMin);
+          Serial.print(", noisy restarts = ");
+          Serial.println(restartCount);
+        }
+        restartCount = 0;
+      #endif*/
      
       m_eye.irThreshold = newThreshold;
     }
