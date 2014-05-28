@@ -78,6 +78,11 @@ void CClydeAfraidOfTheDark::update(uint8_t apin, uint8_t dpin) {
     }
     //if we're ready for a sunset, and we reached the set time, go sunset
     else if (m_ready) {
+        
+#ifdef CLYDE_DEBUG
+        Serial.print("Light: ");
+        Serial.println(light);
+#endif
         startSunset();
         m_ready = false;
     }
@@ -88,6 +93,8 @@ void CClydeAfraidOfTheDark::update(uint8_t apin, uint8_t dpin) {
     m_ready = true;
     #ifdef CLYDE_DEBUG
     Serial.println("Clyde: Afraid of the Dark personality threshold reset.");
+      Serial.print("Light: ");
+      Serial.println(light);
     #endif
   }
 

@@ -99,7 +99,8 @@ CClyde::CClyde() {
 
 void CClyde::begin() {
 #ifdef CLYDE_DEBUG
-  delay(5000);
+  delay(10000);
+    Serial.println("Starting Clyde");
 #endif
 
   //setup module pins
@@ -251,7 +252,7 @@ void CClyde::updateEye() {
 void CClyde::calibrateEye(uint16_t irValue) {
   #ifdef CLYDE_DEBUG
     static int restartCount = 0;
-    //Serial.println("Starting calibration");
+    Serial.println("Starting calibration");
   #endif
   
   //check if calibration was locked
@@ -284,8 +285,13 @@ void CClyde::calibrateEye(uint16_t irValue) {
     m_eye.irMin = m_eye.irMax = irValue;
     
     #ifdef CLYDE_DEBUG
-      Serial.println("IR diff is too high. Restarting count.");
-      restartCount++;
+      //Serial.println("IR diff is too high. Restarting count.");
+      Serial.print("Restart Count: ");
+      Serial.println(restartCount++);
+      Serial.print("IR Value: ");
+      Serial.println(irValue);
+      Serial.print("IR Diff: ");
+      Serial.println(irDiff);
     #endif
   }
 
