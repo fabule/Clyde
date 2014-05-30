@@ -17,11 +17,11 @@
 /*
   EEPROM map
   0-5:    serial number (e.g. FFFFFF)
-  6-7:    firmware version (e.g. 1)
-  8-10:   start ambient color (e.g. 255, 255, 255)
-  11:     # of sunset steps (e.g. 6)
-  12-47:  sunset colors (e.g. R,G,B,R,G,B... max = 12)
-  48-95:  32-bit sunset color intervals (e.g. millis, millis... max = 12)
+  6:      QC passed (e.g. 1)
+  7-9:   start ambient color (e.g. 255, 255, 255)
+  10:     # of sunset steps (e.g. 6)
+  11-46:  sunset colors (e.g. R,G,B,R,G,B... max = 12)
+  47-94:  32-bit sunset color intervals (e.g. millis, millis... max = 12)
 */
 
 #ifndef __CLYDEEEPROM_H
@@ -35,16 +35,16 @@
  * Utility class to manage Clyde's EEPROM.
  */
 class CClydeEEPROM {
-  static const uint16_t VERSION_ADDR = 6;                    //address of the firmware version
-  static const uint16_t AMBIENT_ADDR = VERSION_ADDR+2;       //address of the start ambient color
+  static const uint16_t QC_ADDR = 6;                         //address of the QC passed bit
+  static const uint16_t AMBIENT_ADDR = QC_ADDR+1;            //address of the start ambient color
   static const uint16_t SUNSET_ADDR = AMBIENT_ADDR+3;        //address of the sunset cycle block address
 
 public:
   void writeSerial(char *serial);
   void readSerial(char *serial);
 
-  void writeVersion(uint16_t vers);    
-  void readVersion(uint16_t *vers);
+  void writeQC(bool qc);    
+  void readQC(bool *qc);
 
   void writeAmbientColor(RGB *color);
   void readAmbientColor(RGB *color);
