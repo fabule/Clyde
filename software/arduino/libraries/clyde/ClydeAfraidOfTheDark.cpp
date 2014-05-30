@@ -56,10 +56,10 @@ bool CClydeAfraidOfTheDark::init(uint8_t apin, uint8_t dpin) {
 void CClydeAfraidOfTheDark::update(uint8_t apin, uint8_t dpin) {
   unsigned short light = analogRead(apin);  
   
-  //#ifdef CLYDE_DEBUG
-  //Serial.print("Clyde: light level = ");
-  //Serial.println(light);
-  //#endif
+  #ifdef CLYDE_DEBUG_AFRAID
+  Serial.print("Clyde: light level = ");
+  Serial.println(light);
+  #endif
   
   //if the white light is on, then disable
   if (Clyde.white()->isOn()) {

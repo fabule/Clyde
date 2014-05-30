@@ -24,11 +24,11 @@
  * The Afraid of the Dark personality module.
  */
 class CClydeAfraidOfTheDark : public CClydeModule {
-  static const uint16_t ID_LOW = 895;                 /**< low limit of read identification value */
-  static const uint16_t ID_HIGH = 912;                /**< high limit of read identification value */
-  static const uint16_t START_THRESHOLD = 10;         /**< threshold to reach below to start the sunset cycle */
-  static const uint16_t RESET_THRESHOLD = 50;        /**< threshold to reach above to start checking to starting a new sunset cycle */
-  static const uint16_t THRESHOLD_LOCK_TIME = 1000;   /**< time in millis to stay beyond threshold to trigger */
+  static const uint16_t ID_LOW = 900;                 /**< low limit of read identification value */
+  static const uint16_t ID_HIGH = 920;                /**< high limit of read identification value */
+  static const uint16_t START_THRESHOLD = 20;         /**< threshold to reach below to start the sunset cycle */
+  static const uint16_t RESET_THRESHOLD = 50;         /**< threshold to reach above to start checking to starting a new sunset cycle */
+  static const uint16_t THRESHOLD_LOCK_TIME = 1000;    /**< time in millis to stay beyond threshold to trigger */
   static const uint16_t WHITE_LIGHT_LOCK_TIME = 2000; /**< time in millis to lock after white light is on */
   
   uint32_t m_lock;        /**< time in millis until when we need to stay below threshold to trigger sunset */
