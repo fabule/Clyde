@@ -26,7 +26,7 @@ const uint16_t CClydeTouchyFeely::SELECT_INTERVALS[] = {1000, 1000, 1000, 1000, 
 const uint8_t CClydeTouchyFeely::SELECT_STEPS = 7;
   
 CClydeTouchyFeely::CClydeTouchyFeely()
-  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR) {
+  : CClydeModule(ID_LOW, ID_HIGH), m_mpr121(DEVICE_ADDR, TOUCH_LEVEL, RELEASE_LEVEL) {
   
   m_touchedHandler = NULL;
   m_releasedHandler = NULL;
@@ -35,6 +35,8 @@ CClydeTouchyFeely::CClydeTouchyFeely()
   m_colorSelectEnabled = true;
   m_tickleCount = 0;
   m_firstTickle = 0;
+  m_lastAmbientOn = false;
+  m_lastWhiteOn = false;
 }
 
 bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
@@ -45,7 +47,7 @@ bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
     return false;
   }
   
-  m_mpr121.initialize(true);
+  m_mpr121.initialize(false);
  
   pinMode(dpin, INPUT);
   digitalWrite(dpin, LOW);
@@ -58,25 +60,34 @@ bool CClydeTouchyFeely::init(uint8_t apin, uint8_t dpin) {
 }
 
 void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
+  //reset the MPR121 when light status changes
+  if (Clyde.ambient()->isOn() != m_lastAmbientOn || Clyde.white()->isOn() != m_lastWhiteOn) {
+    if (Clyde.white()->isOn())
+      m_mpr121.reset(false, TOUCH_LEVEL*8, RELEASE_LEVEL*2);
+    else
+      m_mpr121.reset(false, TOUCH_LEVEL, RELEASE_LEVEL);
+    m_lastAmbientOn = Clyde.ambient()->isOn();
+    m_lastWhiteOn = Clyde.white()->isOn();
+  }
+  
   //only active when the ambient light is on
-  if (m_colorSelectEnabled && !Clyde.ambient()->isOn()) return;
+  if (!Clyde.ambient()->isOn()/* || Clyde.white()->isOn()*/) return;
 
   //trigger touch event after a few millis to protect from false positive
-  if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 1000)) {
+  if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 250)) {
+    #ifdef CLYDE_DEBUG
+    Serial.println("Clyde: Touchy-Feely triggered touch event.");
+    #endif
+      
     //start color selection only if current cycle isn't laugh or select
-    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH)) {
+    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH))
       startColorSelect();
-    
-      #ifdef CLYDE_DEBUG
-      Serial.println("Clyde: Touchy-Feely detected a touch (2).");
-      #endif
-    }
     
     //call touched handler if any
     if (m_touchedHandler) m_touchedHandler();
     
     //reset status to only call this once
-    m_touchStatus = 0;
+    m_touchStatus = 0x1000;
   }
 
   //check for mpr121 interrupt
@@ -86,29 +97,25 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   //read the touch state from the MPR121
   m_touchStatus = m_mpr121.getTouchStatus();
 
-  //if clyde is not laughing already
-  if (!Clyde.cycle()->is(LAUGH)) { //TODO better method names: Clyde.isLaughing()
-    //and any leg is touched, then start color selection
-    if (m_touchStatus & 0x0FFF) {
-      #ifdef CLYDE_DEBUG
-      Serial.println("Clyde: Touchy-Feely detected a touch.");
-      #endif
-      
-      m_touchStart = millis();
-    }
-    //if leg is not touched, stop cycle
-    else {
-      #ifdef CLYDE_DEBUG
-      Serial.println("Clyde: Touchy-Feely detected a release.");
-      #endif
-      
-      stopColorSelect();  
-      tickleCheck();
-    }
+  //keep track of when touch started
+  if (m_touchStatus & 0x0FFF) {
+    #ifdef CLYDE_DEBUG
+    Serial.println("Clyde: Touchy-Feely detected a touch.");
+    #endif
+    
+    m_touchStart = millis();
   }
-  //if clyde is laughing, check for tickles to see if it needs to continue
-  else if (!(m_touchStatus & 0x0FFF)) {
-    tickleCheck();
+  else {
+    #ifdef CLYDE_DEBUG
+    Serial.print("Clyde: Touchy-Feely detected a release. Touch lasted: ");
+    Serial.println(millis() - m_touchStart);
+    #endif
+    
+    if (!Clyde.cycle()->is(LAUGH))
+      stopColorSelect();
+    
+    if (!Clyde.white()->isOn())
+      tickleCheck();
   }
   
   //call released handler if it is set and no legs are touched

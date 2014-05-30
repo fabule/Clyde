@@ -32,6 +32,9 @@
  */
 class CClydeTouchyFeely : public CClydeModule {
   static const uint8_t DEVICE_ADDR = 0x5A;        /**< i2c address of mpr121 */
+  static const uint8_t TOUCH_LEVEL = 0x06;    /**< touch threshold of mpr121 */
+  static const uint8_t RELEASE_LEVEL = 0x04;  /**< release threshold of mpr121 */
+  
   static const uint16_t ID_LOW = 1000;            /**< low limit of read identification value */
   static const uint16_t ID_HIGH = 1010;           /**< high limit of read identification value */
 
@@ -49,6 +52,8 @@ class CClydeTouchyFeely : public CClydeModule {
   uint8_t m_lastStopStep;    /**< step index when the color select cycle was stopped. */
   uint16_t m_touchStatus;    /**< current status of touch electrodes. */
   uint32_t m_touchStart;     /**< time in millis when the active touch started. */
+  bool m_lastAmbientOn;      /**< status of the ambient light on last update. */
+  bool m_lastWhiteOn;        /**< status of the white light on last update. */
   
   RGB m_laughColors[CClyde::CAmbientCycle::MAX_CYCLE_LENGTH];           /**< colors of the laugh cycle */   //this could be in the main class
   uint16_t m_laughIntervals[CClyde::CAmbientCycle::MAX_CYCLE_LENGTH];   /**< intervals of the laugh cycle */
