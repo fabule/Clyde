@@ -205,3 +205,11 @@ uint16_t MPR121::getTouchStatus() {
   statusBuf += buf;
   return statusBuf;
 }
+
+void MPR121::reset(bool autoconfig, uint8_t touch, uint8_t release) {
+  if (touch != 0) m_touchThreshold = touch;
+  if (release != 0) m_releaseThreshold = release;
+  I2Cdev::writeByte(m_devAddr, ELECTRODE_CONFIG, 0x00);  
+  I2Cdev::writeByte(m_devAddr, SOFT_RESET, 0x63);
+  initialize(autoconfig);
+}

@@ -178,9 +178,11 @@ THE SOFTWARE.
 #define AUTO_CONFIG_LSL          0x7E
 #define AUTO_CONFIG_TARGET_LEVEL 0x7F
 
+#define SOFT_RESET               0x80
+
 // Other Constants
-#define TOUCH_THRESHOLD   0x0F
-#define RELEASE_THRESHOLD 0x0A
+#define TOUCH_THRESHOLD   0x06
+#define RELEASE_THRESHOLD 0x04
 #define NUM_CHANNELS      12
 
 class MPR121
@@ -204,8 +206,12 @@ class MPR121
 
     // getTouchStatus returns the touch status for the given channel (0 - 11)
     bool getTouchStatus(uint8_t channel);
+    
     // when not given a channel, returns a bitfield of all touch channels.
     uint16_t getTouchStatus();
+    
+    // reset the mpr121
+    void reset(bool autoconfig = false, uint8_t touch = 0, uint8_t release = 0);
     
   private:
     uint8_t m_devAddr; // contains the I2C address of the device
