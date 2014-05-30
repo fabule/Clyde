@@ -27,7 +27,10 @@
 #include "ClydeEEPROM.h"
 #include "ClydeModule.h"
 
-#define CLYDE_DEBUG
+//#define CLYDE_DEBUG
+//#define CLYDE_DEBUG_WAIT     //wait five seconds before setup/init
+//#define CLYDE_DEBUG_EYE  //output extra values about the eye
+//#define CLYDE_DEBUG_AFRAID   //output extra values about AoD module
 
 /**
  * Enum types of ambient color cycles.
@@ -182,6 +185,10 @@ public:
     uint32_t pressedStart;    /**< Time when we detected the start of a press. */
     uint8_t pressedCount;     /**< Number of time we detected a pressed state consecutively. */
     uint32_t pressLock;       /**< Time until when pressed events can not trigger. */
+    
+    #ifdef CLYDE_DEBUG
+      uint16_t restartCount;  /**< Number of time calibration restarted because of noise since last calibration. */
+    #endif    
   };
   
   /**

@@ -81,6 +81,10 @@ CClyde::CClyde() {
   m_eye.pressedCount = 0;
   m_eye.pressLock = 0;
   
+#ifdef CLYDE_DEBUG
+  m_eye.restartCount = 0;
+#endif
+  
   //init ambient cycle
   m_cycle.type = OFF;
   m_cycle.numSteps = 0;
@@ -98,7 +102,7 @@ CClyde::CClyde() {
 }
 
 void CClyde::begin() {
-#ifdef CLYDE_DEBUG
+#ifdef CLYDE_DEBUG_WAIT
   delay(5000);
 #endif
 
@@ -157,9 +161,7 @@ void CClyde::detectPersonalities() {
       digitalWrite(m_modules[j].dpin, HIGH);
       uint16_t idValue = analogRead(m_modules[j].apin);
       pinMode(m_modules[j].dpin, INPUT);
-      
-      Serial.println(idValue);
-      
+            
       //check for each type of module
       #ifdef ENABLE_AFRAID_OF_THE_DARK
       if (AfraidOfTheDark.id(idValue))
@@ -223,9 +225,7 @@ void CClyde::updateEye() {
   //if the eye was pressed
   if (wasEyePressed(irValue)) {
     #ifdef CLYDE_DEBUG
-      Serial.print("Clyde: eye was pressed.");
-      if (m_cycle.isOn()) Serial.println(" stopped cycle.");
-      else Serial.println(" switched lights. ");
+      Serial.println("Clyde: eye was pressed.");
     #endif  
 
     //and the ambient cycle is on, then turn it off
@@ -237,22 +237,21 @@ void CClyde::updateEye() {
   }
 }
 
-void CClyde::calibrateEye(uint16_t irValue) {
-  #ifdef CLYDE_DEBUG
-    static int restartCount = 0;
-  #endif
-  
+void CClyde::calibrateEye(uint16_t irValue) {  
   //check if calibration was locked
   if (millis() < m_eye.calibLock) return;
   
   //if IR has never been calibrated, blink white light until it is
-  //if(!m_eye.onceCalibrated) {
-  //  if (millis() > m_eye.nextCalibBlink) {
-  //    m_eye.calibBlink = !m_eye.calibBlink;
-  //    setWhite(m_eye.calibBlink ? 0 : 255);
-  //    m_eye.nextCalibBlink += m_eye.calibBlink ? CEye::CALIB_BLINK_DURATION : CEye::CALIB_BLINK_INTERVAL;
-  //  }
-  //}
+  if(!m_eye.onceCalibrated) {
+    long now = millis();
+    if (now > 2000 && (now < 12000 || Clyde.white()->isOn())) {
+      setWhite(255 - ((sin((now - 2000)/500.0 - HALF_PI) + 1) / 2.0 * 20));
+    }
+    else if (now >= 12000) {
+      setWhite(0);
+      m_eye.onceCalibrated = true; //TODO: use a better variable for this
+    }
+  } 
   
   //if the eye is pressed, don't try to calibrate
   if (m_eye.pressedCount > 0) return;
@@ -272,7 +271,7 @@ void CClyde::calibrateEye(uint16_t irValue) {
     m_eye.irMin = m_eye.irMax = irValue;
     
     #ifdef CLYDE_DEBUG
-      restartCount++;
+      m_eye.restartCount++;
     #endif
   }
 
@@ -295,6 +294,9 @@ void CClyde::calibrateEye(uint16_t irValue) {
       //if the eye was not calibrated, turn on ambient light to show feedback
       if (!m_eye.calibrated)
         fadeAmbient(m_ambient.savedColor, 0.1f);
+      
+      if (!m_eye.onceCalibrated)
+        setWhite(255);
 
       m_eye.calibrated = true;
       m_eye.onceCalibrated = true;
@@ -304,17 +306,19 @@ void CClyde::calibrateEye(uint16_t irValue) {
       //the less ir detected (higher value) the less difference required to trigger
       uint16_t newThreshold = irAvg * CEye::CALIB_FORMULA_A + CEye::CALIB_FORMULA_B;
 
-      //#ifdef CLYDE_DEBUG
-      //  if (m_eye.irThreshold != newThreshold) {
-      //    Serial.print("Clyde: eye calibrated. threshold = ");
-      //    Serial.print(newThreshold);
-      //    Serial.print(", range = ");
-      //    Serial.print(m_eye.irMax - m_eye.irMin);
-      //    Serial.print(", noisy restarts = ");
-      //    Serial.println(restartCount);
-      //  }
-      //  restartCount = 0;
-      //#endif      
+      #ifdef CLYDE_DEBUG_EYE
+        if (m_eye.irThreshold != newThreshold) {
+          Serial.print("Clyde: eye calibrated. avg = ");
+          Serial.print(irAvg);
+          Serial.print(", threshold = ");
+          Serial.print(newThreshold);
+          Serial.print(", range = ");
+          Serial.print(m_eye.irMax - m_eye.irMin);
+          Serial.print(", noisy restarts = ");
+          Serial.println(m_eye.restartCount);
+        }
+        m_eye.restartCount = 0;
+      #endif      
      
       m_eye.irThreshold = newThreshold;
     }
@@ -623,6 +627,13 @@ void CClyde::switchLights()
     setPlayMode(PLAYMODE_SINGLE);
     play(SND_ON);
   }
+  
+#ifdef CLYDE_DEBUG
+  Serial.print("Switched lights: white is ");
+  Serial.print(m_white.isOn() ? "ON" : "OFF");
+  Serial.print(" ambient is ");
+  Serial.println(m_ambient.isOn() ? "ON" : "OFF");
+#endif
 }
 
 void CClyde::setCycle(ECycleType type, uint8_t steps, const RGB *colors, const uint8_t *intervals, ECycleLoop loop) {
@@ -728,7 +739,7 @@ void CClyde::updateCycle() {
   newColor.g = m_cycle.stepColor.g + (t*diff);
   diff = m_cycle.colors[m_cycle.step].b - m_cycle.stepColor.b;
   newColor.b = m_cycle.stepColor.b + (t*diff);
-
+  
   setAmbient(newColor);
 }
 
