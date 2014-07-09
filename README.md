@@ -12,11 +12,11 @@ Installation
 
 The Clyde firmware is divided into three parts: bootloader, library, and sketch.
 
-You can find the Clyde library in /software/arduino/libraries/. Place the "clyde" library folder inside your Arduino "librairies" folder. This contains the majority of the code that controls Clyde. If you are not sure about how to install an Arduino library, you can find instructions here: http://arduino.cc/en/Guide/Libraries
+You can find the Clyde library in /software/arduino/libraries/. Place the "clyde" library folder inside your Arduino "libraries" folder. This contains the majority of the code that controls Clyde. If you are not sure about how to install an Arduino library, you can find instructions here: http://arduino.cc/en/Guide/Libraries
 
 When the library is in place, you can look for the sketch in /software/arduino/firmwares/. Place the "ClydeFirmware" sketch folder inside your Arduino "sketches" folder. This sketch does not contain much, but it is a good place to start playing with Clyde's behaviors.
 
-Before you open your Arduino IDE, you'll need to copy one more folder. This step will add Clyde as a device under the "Tools > Board menu". First, if you do not have a "hardware" folder at the same level as your Arduino "librairies" folder, time to create one. Browse to the "hardware" folder in /software/arduino/hardware/ and open the subfolder that matches the version of your Arduino IDE, 1.0.5 or 1.5. Inside you'll find a "fabule" folder. Copy the "fabule" folder, inside the Arduino "hardware" folder you just created.
+Before you open your Arduino IDE, you'll need to copy one more folder. This step will add Clyde as a device under the "Tools > Board menu". First, if you do not have a "hardware" folder at the same level as your Arduino "libraries" folder, time to create one. Browse to the "hardware" folder in /software/arduino/hardware/ and open the subfolder that matches the version of your Arduino IDE, 1.0.5 or 1.5. Inside you'll find a "fabule" folder. Copy the "fabule" folder, inside the Arduino "hardware" folder you just created.
 
 At this point, you should be ready to compile and upload Clyde's firmware. Connect Clyde to your computer using the USB cable. If you are using Windows, you'll need to point to Clyde's driver found in /software/arduino/drivers/. Open the "ClydeFirmware" sketch in your Arduino IDE. Select Clyde under the "Tools > Board" menu, and the port assigned to Clyde under "Tools > Serial" Port. Press "Upload", and the firmware should compile and upload into Clyde.
 
