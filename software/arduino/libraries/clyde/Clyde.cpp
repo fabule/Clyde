@@ -123,6 +123,15 @@ void CClyde::begin() {
   //setup white light pins
   pinMode(m_white.pin, OUTPUT);
   analogWrite(m_white.pin, m_white.brightness);
+  
+  //Fade white reading light from bright to off
+  analogWrite(m_white.pin, 0);
+  delay(500);
+  for(int x = 0 ; x < 255 ; x++)
+  {
+	analogWrite(m_white.pin, x);
+	delay(10);
+  }
 
   //setup mouth / mp3 shield
   m_mouth.mp3.begin(9600);
@@ -548,6 +557,8 @@ void CClyde::showAmbientLight() {
   analogWrite(m_ambient.b_pin, (uint8_t)(m_ambient.color.b * CAmbientLight::SCALE_CONSTRAINT));  
 }
 
+//Slowly fade from the .targetBrightness to .brightness
+//Do so at the .fadeSpeed
 void CClyde::updateWhiteLight() {
   //only fade if we haven't reached the desired level
   if (m_white.targetBrightness == m_white.brightness)
@@ -564,6 +575,7 @@ void CClyde::updateWhiteLight() {
   showWhiteLight();
 }
 
+//Takes the value stored in .brightness and posts it to the analog pin
 void CClyde::showWhiteLight() {
   analogWrite(m_white.pin, m_white.brightness);
 }
@@ -597,6 +609,7 @@ void CClyde::fadeAmbient(const RGB &c, float spd) {
   if (m_ambient.fadeSpeed.b < 0) m_ambient.fadeSpeed.b *= -1;
 }
 
+
 void CClyde::setWhite(uint8_t b) {
   m_white.brightness = m_white.targetBrightness = b;
   showWhiteLight();
@@ -609,6 +622,8 @@ void CClyde::fadeWhite(uint8_t b, float spd) {
   if (m_white.fadeSpeed < 0) m_white.fadeSpeed *= -1;
 }
 
+//Called when eye is pressed
+//Changes lights from ? to ? based on touch
 void CClyde::switchLights()
 { 
   if (!m_white.isOn() && m_ambient.isOn()) {
