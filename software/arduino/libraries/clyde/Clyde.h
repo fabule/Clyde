@@ -288,6 +288,16 @@ public:
   CAmbientLight* ambient() { return &m_ambient; }
   
   /**
+   * Read the switch state. Returns true is eye is pressed.
+   */
+  bool checkEye();
+
+  /**
+   * Returns the amount of time in ms the switch has been pushed.
+   */
+  int pressedLength();
+
+  /**
    * Set ambient color.
    */
   void setAmbient(const RGB &c);

@@ -62,7 +62,8 @@ CClyde::CClyde() {
   //but this adds a flash on startup instead, which is kinda neat
   //TODO look for a better solution
   m_white.pin = 11;
-  setWhite(254);
+//  setWhite(254);
+  setWhite(255);
   
   //init eye
   m_eye.pin = 0;
@@ -124,15 +125,6 @@ void CClyde::begin() {
   pinMode(m_white.pin, OUTPUT);
   analogWrite(m_white.pin, m_white.brightness);
   
-  //Fade white reading light from bright to off
-  analogWrite(m_white.pin, 0);
-  delay(500);
-  for(int x = 0 ; x < 255 ; x++)
-  {
-	analogWrite(m_white.pin, x);
-	delay(10);
-  }
-
   //setup mouth / mp3 shield
   m_mouth.mp3.begin(9600);
 
@@ -145,7 +137,7 @@ void CClyde::begin() {
   
   //load parameters from eeprom
   m_eeprom.readAmbientColor(&m_ambient.savedColor);
-  
+
   //detect the personality modules
   detectPersonalities();
   
@@ -224,11 +216,37 @@ void CClyde::detectMouth() {
   m_mouth.waitingOpCode = Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
 }
 
+//Checks to see if eye was pressed
+//Returns true if it is
+bool CClyde::checkEye() {
+  //read IR value
+  uint16_t irValue = analogRead(m_eye.pin);
+
+  //calibrate the eye's IR sensor
+  calibrateEye(irValue);
+
+  if (wasEyePressed(irValue))
+	return(true);
+  else
+	return(false);
+}
+
+//Reports the number of milliseconds the eye has been pressed
+int CClyde::pressedLength() {
+
+  //If the eye press has reached threshold then we know that this is a valid button press
+  if (m_eye.pressedCount == CEye::PRESS_COUNT_THRESHOLD)
+    return(millis() - m_eye.pressedStart);
+  else
+    return(0);
+}
+
+
 void CClyde::updateEye() {
   //read IR value
   uint16_t irValue = analogRead(m_eye.pin);
 
-  //calibrated the eye's IR sensor
+  //calibrate the eye's IR sensor
   calibrateEye(irValue);
 
   //if the eye was pressed
@@ -367,11 +385,12 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
   //Serial.println(irValue);
   //#endif
   
-  //if the eye press is detected enough time, trigger press event
+  //if the eye press is detected enough times, trigger press event
   if (m_eye.pressedCount == CEye::PRESS_COUNT_THRESHOLD) {
     //and we detect that's it's still pressed,
     //then keep track of the last time is was detected
-    if (irValue >= m_eye.irThreshold) {
+    
+	if (irValue >= m_eye.irThreshold) {
       m_eye.pressedLast = millis();
       //if the eye has been pressed for a some time, auto release
       if (millis() > m_eye.pressedStart+3000) {
@@ -398,7 +417,9 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
   else if (irValue >= m_eye.irThreshold) {
     m_eye.pressedCount++;
     m_eye.pressedLast = millis();
-    if (m_eye.pressedCount == CEye::PRESS_COUNT_THRESHOLD) {
+    
+	//If the eye has been pressed for enough counts then report a positive press event
+	if (m_eye.pressedCount == CEye::PRESS_COUNT_THRESHOLD) {
       m_eye.pressedStart = m_eye.pressedLast;
       return true;
     }
@@ -593,6 +614,8 @@ void CClyde::updatePersonalities() {
   }
 }
 
+//Move from one color to the next at a speed.
+//A speed of 1 is very fast. 0.01 is very gradual over a few seconds
 void CClyde::fadeAmbient(const RGB &c, float spd) {
   m_ambient.targetColor = c;
   
