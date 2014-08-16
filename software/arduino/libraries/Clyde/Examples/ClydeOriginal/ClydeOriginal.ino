@@ -13,6 +13,7 @@ void setup() {
   Wire.begin();
   
   Serial.begin(9600);
+  while (!Serial) ;
   sCmd.addCommand("SERIAL", cmdSerial);
   sCmd.addCommand("VERSION", cmdVersion);
   sCmd.addCommand("RESET", cmdReset);
@@ -23,6 +24,7 @@ void setup() {
   
   //Clyde.eeprom()->reset();
   Clyde.begin();
+  Serial.println("Clyde is Ready!");
 }
 
 void loop() {
