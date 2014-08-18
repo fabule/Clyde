@@ -21,7 +21,7 @@ void setup() {
   sCmd.addCommand("WRITE_EEPROM", cmdWriteEEPROM);
   sCmd.addCommand("READ_EEPROM", cmdReadEEPROM);
   
-  //Clyde.eeprom()->reset();
+  //	Clyde.eeprom()->reset();
   Clyde.begin();
 }
 

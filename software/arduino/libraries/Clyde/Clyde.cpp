@@ -615,6 +615,8 @@ void CClyde::switchLights()
     fadeWhite(0, 0.1f);
   }
   else if (m_white.isOn() && m_ambient.isOn()) {
+    // save the current ambient light before switching off.
+    m_ambient.save();
     fadeAmbient(RGB(0,0,0), 0.5f);
   }
   else if (m_white.isOn() && !m_ambient.isOn()) {

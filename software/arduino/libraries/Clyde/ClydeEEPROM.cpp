@@ -150,11 +150,9 @@ void CClydeEEPROM::reset() {
   
   //write the default sunset cycle
   //TODO: move values to somewhere more obvious, like top of ClydeAfraidOfTheDark.h
-  const uint8_t sunsetSteps = 9;
-  //RGB sunsetColors[sunsetSteps] = {RGB(255, 150, 0), RGB(255, 0, 0), RGB(100, 0, 200), RGB(0, 0, 255), RGB(0, 0, 0), RGB(0, 0, 180), RGB(0, 0, 0), RGB(0, 0, 125), RGB(0, 0, 0)};
-  RGB sunsetColors[sunsetSteps] = {RGB(185, 0, 200), RGB(250, 0, 150), RGB(200, 0, 125), RGB(200, 0, 100), RGB(200, 0, 0), RGB(200, 50, 0), RGB(150, 50, 25), RGB(50, 25, 0), RGB(0, 0, 0)};
-  //uint32_t sunsetIntervals[sunsetSteps] = {3000, 400000, 300000, 200000, 180000, 120000, 3000, 2000, 1000}; //real
-  uint32_t sunsetIntervals[sunsetSteps] = {10000, 120000, 120000, 120000, 120000, 120000, 60000, 30000, 30000}; //real
+  const uint8_t sunsetSteps = 8;
+  RGB sunsetColors[sunsetSteps] = {RGB(242, 103, 31), RGB(201, 27, 38), RGB(156, 15, 95), RGB(96, 4, 122), RGB(22, 10, 71), RGB( 12, 5, 35 ), RGB( 5, 0, 15 ), RGB( 0, 0, 5 ) };
+  uint32_t sunsetIntervals[sunsetSteps] = {60000, 90000, 90000, 90000, 60000, 60000, 60000, 60000}; //real
   //uint32_t sunsetIntervals[sunsetSteps] = {500, 10000, 5000, 5000, 3000, 2000, 1500, 1000, 1000}; //demo
   
   clearSunsetCycle();
