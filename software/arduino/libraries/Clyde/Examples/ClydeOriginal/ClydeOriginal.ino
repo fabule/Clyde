@@ -13,7 +13,8 @@ void setup() {
   Wire.begin();
   
   Serial.begin(9600);
-  while (!Serial) ;
+  // Uncomment this line to talk to Clyde over the Serial Monitor
+  // while (!Serial) ;
   sCmd.addCommand("SERIAL", cmdSerial);
   sCmd.addCommand("VERSION", cmdVersion);
   sCmd.addCommand("RESET", cmdReset);
