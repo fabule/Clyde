@@ -87,7 +87,7 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
     #endif
       
     //start color selection only if current cycle isn't laugh or select
-    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH))
+    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH) && !Clyde.cycle()->is(SUNSET))
       startColorSelect();
     
     //call touched handler if any
