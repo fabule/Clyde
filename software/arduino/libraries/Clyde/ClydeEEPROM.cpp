@@ -153,7 +153,7 @@ void CClydeEEPROM::reset() {
   const uint8_t sunsetSteps = 9;
   RGB sunsetColors[sunsetSteps] = {RGB(242, 103, 31), RGB(201, 27, 38), RGB(156, 15, 95), RGB(96, 4, 122), RGB(22, 10, 71), RGB( 12, 5, 35 ), RGB( 5, 0, 15 ), RGB( 0, 0, 5 ), RGB( 0, 0, 0 ) };
   uint32_t sunsetIntervals[sunsetSteps] = {60000, 90000, 90000, 90000, 60000, 60000, 60000, 60000, 60000}; //real
-  //uint32_t sunsetIntervals[sunsetSteps] = {500, 5000, 5000, 5000, 3000, 2000, 1500, 1000, 1000}; //demo
+  //uint32_t sunsetIntervals[sunsetSteps] = {500, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000}; //demo
   
   clearSunsetCycle();
   writeSunsetCycle(sunsetSteps, &sunsetColors[0], &sunsetIntervals[0]);
