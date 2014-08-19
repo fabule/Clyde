@@ -4,6 +4,8 @@
 #include <SerialCommand.h>
 #include <SoftwareSerial.h>
 #include <MPR121.h>
+#include <Time.h>
+#include <TimeAlarms.h>
 
 #define FIRMWARE_VERSION 1
 
@@ -16,12 +18,16 @@ void setup() {
   sCmd.addCommand("SERIAL", cmdSerial);
   sCmd.addCommand("VERSION", cmdVersion);
   sCmd.addCommand("RESET", cmdReset);
-  sCmd.addCommand("SET_AMBIENT", cmdSetAmbient);
-  sCmd.addCommand("SET_WHITE", cmdSetWhite);
-  sCmd.addCommand("WRITE_EEPROM", cmdWriteEEPROM);
-  sCmd.addCommand("READ_EEPROM", cmdReadEEPROM);
+  sCmd.addCommand("TIME", digitalClockDisplay);
+//  sCmd.addCommand("SET_AMBIENT", cmdSetAmbient);
+//  sCmd.addCommand("SET_WHITE", cmdSetWhite);
+//  sCmd.addCommand("WRITE_EEPROM", cmdWriteEEPROM);
+//  sCmd.addCommand("READ_EEPROM", cmdReadEEPROM);
   
-  //	Clyde.eeprom()->reset();
+  setTime(8,29,0,1,1,11);
+  Alarm.alarmRepeat(8,31,0, MorningAlarm);
+  Alarm.timerRepeat( 15, repeat );
+  Clyde.eeprom()->reset();
   Clyde.begin();
 }
 
@@ -42,6 +48,32 @@ void loop() {
   //make Clyde behave after the eye was calibrated once
   if (Clyde.wasEyeCalibratedOnce())
     Clyde.updatePersonalities();
+}
+
+void repeat(){
+     Clyde.setWhite(200);
+}
+
+void MorningAlarm(){
+  Serial.println("Alarm: - turn lights off");
+  Clyde.setWhite(200);
+}
+
+void digitalClockDisplay()
+{
+  // digital clock display of the time
+  Serial.print(hour());
+  printDigits(minute());
+  printDigits(second());
+  Serial.println(); 
+}
+
+void printDigits(int digits)
+{
+  Serial.print(":");
+  if(digits < 10)
+    Serial.print('0');
+  Serial.print(digits);
 }
 
 //
@@ -66,6 +98,7 @@ void cmdReset() {
   Serial.println("OK"); 
 }
 
+/**
 void cmdSetAmbient() {
   char *param1, *param2, *param3;
   int r, g, b;
@@ -123,3 +156,4 @@ void cmdReadEEPROM() {
   Serial.print("OK ");
   Serial.println(EEPROM.read(addr));
 }
+*/
