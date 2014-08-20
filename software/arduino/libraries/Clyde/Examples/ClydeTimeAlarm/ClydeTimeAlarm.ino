@@ -4,6 +4,8 @@
 #include <SerialCommand.h>
 #include <SoftwareSerial.h>
 #include <MPR121.h>
+#include <Time.h>
+#include <TimeAlarms.h>
 
 #define FIRMWARE_VERSION 1
 
@@ -17,12 +19,14 @@ void setup() {
   sCmd.addCommand("VERSION", cmdVersion);
   sCmd.addCommand("RESET", cmdReset);
   sCmd.addCommand("TIME", digitalClockDisplay);
-  sCmd.addCommand("SET_AMBIENT", cmdSetAmbient);
-  sCmd.addCommand("SET_WHITE", cmdSetWhite);
-  sCmd.addCommand("WRITE_EEPROM", cmdWriteEEPROM);
-  sCmd.addCommand("READ_EEPROM", cmdReadEEPROM);
+//  sCmd.addCommand("SET_AMBIENT", cmdSetAmbient);
+//  sCmd.addCommand("SET_WHITE", cmdSetWhite);
+//  sCmd.addCommand("WRITE_EEPROM", cmdWriteEEPROM);
+//  sCmd.addCommand("READ_EEPROM", cmdReadEEPROM);
 
-  //Clyde.eeprom()->reset();
+  setTime(8,29,0,1,1,11);
+  Alarm.alarmRepeat(8,31,0, MorningAlarm);
+  Clyde.eeprom()->reset();
   Clyde.begin();
 }
 
@@ -43,6 +47,33 @@ void loop() {
   //make Clyde behave after the eye was calibrated once
   if (Clyde.wasEyeCalibratedOnce())
     Clyde.updatePersonalities();
+
+  // check for alarm.
+  // Note: if this delay function causes any problems we make the serviceAlarms function
+  // public and directly call that here.
+  Alarm.delay( 5 );  // delay for 5ms.
+}
+
+void MorningAlarm(){
+  Serial.println("Alarm: - turn lights on!");
+  Clyde.setWhite(200);
+}
+
+void digitalClockDisplay()
+{
+  // digital clock display of the time
+  Serial.print(hour());
+  printDigits(minute());
+  printDigits(second());
+  Serial.println();
+}
+
+void printDigits(int digits)
+{
+  Serial.print(":");
+  if(digits < 10)
+    Serial.print('0');
+  Serial.print(digits);
 }
 
 //
@@ -67,6 +98,7 @@ void cmdReset() {
   Serial.println("OK");
 }
 
+/**
 void cmdSetAmbient() {
   char *param1, *param2, *param3;
   int r, g, b;
@@ -124,4 +156,4 @@ void cmdReadEEPROM() {
   Serial.print("OK ");
   Serial.println(EEPROM.read(addr));
 }
-
+*/
