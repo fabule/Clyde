@@ -59,6 +59,12 @@ void MorningAlarm(){
   Clyde.setWhite(200);
 }
 
+void startSunrise(){
+  RGB sunriseColors[7] = {RGB(19, 17, 28), RGB(39, 34, 57), RGB(78, 69, 114), RGB(46, 108, 181), RGB(168, 142, 127), RGB(255, 166, 48), RGB(255, 210, 66) };
+  uint32_t suriseIntervals[7] = {30000, 60000, 60000, 60000, 60000, 60000, 60000}; //real
+  Clyde.setCycle( SUNRISE, 7, sunriseColors, sunriseIntervals )
+}
+
 void digitalClockDisplay()
 {
   // digital clock display of the time

@@ -86,7 +86,7 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
     Serial.println("Clyde: Touchy-Feely triggered touch event.");
     #endif
       
-    //start color selection only if current cycle isn't laugh or select
+    //start color selection only if the current cycle isn't laugh or select
     if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH) && !Clyde.cycle()->is(SUNSET))
       startColorSelect();
     

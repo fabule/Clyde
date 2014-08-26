@@ -24,6 +24,14 @@ At this point, you should be ready to compile and upload Clyde's firmware. Conne
 
 If you want to make modifications to the bootloader, please refer to the information found here: https://github.com/fabule/Clyde/tree/master/software/arduino/bootloaders/caterina
 
+Configurations
+--------------
+
+h3. Using `TimeAlarms` library to enable alarms
+
+The `Time` and `TimeAlarms` libraries provide functionality to set/get the time on an arduino and enable repeated or single alarms. An example configuration to use Clyde as an *alarm clock* is given in `/software/arduino/libraries/Clyde/Examples/ClydeTimeAlarm.ino`. The essential steps are to set the time and to define an alarm. Without any additional hardware, the time has to be set manually in and the firmware has to be uploaded to Clyde each time Clyde is detached from the power source. 
+
+
 Credits
 -------
 Clyde is an open source project manage by Fabule Fabrications in Montréal, Québec, Canada.

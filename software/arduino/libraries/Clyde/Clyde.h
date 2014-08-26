@@ -39,6 +39,7 @@ enum ECycleType {
 	OFF,
 	BLINK,
 	SUNSET,
+	SUNRISE,
   SELECT,
   LAUGH,
   UNKNOWN
