@@ -34,7 +34,9 @@ CClyde Clyde;
 
 const float CClyde::CAmbientLight::SCALE_CONSTRAINT = 225.0f / 255.0f;
 
+#ifdef ENABLE_MOUTH
 SoftwareSerial CClyde::CMouth::mp3(CClyde::CMouth::RX_PIN, CClyde::CMouth::TX_PIN);
+#endif
 
 CClyde::CClyde() {
   //init modules
@@ -96,9 +98,11 @@ CClyde::CClyde() {
   memset((void*)&m_cycle.intervals[0], 0, sizeof(uint32_t)*CAmbientCycle::MAX_CYCLE_LENGTH);
   m_cycle.loop = NO_LOOP;
   
+#ifdef ENABLE_MOUTH
   m_mouth.detected = false;
   m_mouth.waitingOpCode = OP_NONE;
   m_mouth.lastCmdTime = 0;
+#endif
 }
 
 void CClyde::begin() {
@@ -124,6 +128,7 @@ void CClyde::begin() {
   pinMode(m_white.pin, OUTPUT);
   analogWrite(m_white.pin, m_white.brightness);
 
+#ifdef ENABLE_MOUTH
   //setup mouth / mp3 shield
   m_mouth.mp3.begin(9600);
 
@@ -133,6 +138,7 @@ void CClyde::begin() {
   pinMode(CMouth::TX_PIN, OUTPUT);
   
   digitalWrite(CMouth::SELECT_PIN, HIGH);
+#endif
   
   //load parameters from eeprom
   m_eeprom.readAmbientColor(&m_ambient.savedColor);
@@ -140,8 +146,10 @@ void CClyde::begin() {
   //detect the personality modules
   detectPersonalities();
   
+#ifdef ENABLE_MOUTH
   //detect the loudmouth shield
   detectMouth();
+#endif
   
   //set default lights off
   setAmbient(RGB(0,0,0));
@@ -212,7 +220,9 @@ void CClyde::detectMouth() {
   #ifdef CLYDE_DEBUG
     Serial.println("Clyde: Trying to detect Loudmouth. Request set play mode: Single Loop Mode");
   #endif
-  m_mouth.waitingOpCode = Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
+#ifdef ENABLE_MOUTH
+    m_mouth.waitingOpCode = Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
+#endif
 }
 
 void CClyde::updateEye() {
@@ -293,7 +303,8 @@ void CClyde::calibrateEye(uint16_t irValue) {
     if (irAvg < (uint16_t)((CEye::CALIB_FORMULA_B - CEye::CALIB_MIN_THRESHOLD_DIFF) / CEye::CALIB_FORMULA_A)) {
       //if the eye was not calibrated, turn on ambient light to show feedback
       if (!m_eye.calibrated)
-        fadeAmbient(m_ambient.savedColor, 0.1f);
+        //fadeAmbient(m_ambient.savedColor, 0.1f);
+        fadeAmbient(m_ambient.savedColor, 10);
       
       if (!m_eye.onceCalibrated)
         setWhite(255);
@@ -371,10 +382,10 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
         //blink(RGB(255,0,0), 200, 200, 3);
         setAmbient(RGB(0, 0, 0));
         setWhite(255);
-        
+#ifdef ENABLE_MOUTH        
         setPlayMode(PLAYMODE_SINGLE);
         play(SND_ERROR);
-      
+#endif
         #ifdef CLYDE_DEBUG
         Serial.println("Clyde: eye long press detected. auto release.");
         #endif
@@ -402,6 +413,7 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
   return false;
 }
 
+#ifdef ENABLE_MOUTH
 void CClyde::updateMouth() {
   //detect the loudmouth shield at startup by waiting for mp3 player response
   if (!m_mouth.detected) {
@@ -514,6 +526,7 @@ EOpCode CClyde::stop(void)
   
   return OP_PAUSE;
 }
+#endif
 
 void CClyde::updateAmbientLight() {
   //update ambient cycle
@@ -581,14 +594,31 @@ void CClyde::updatePersonalities() {
   }
 }
 
-void CClyde::fadeAmbient(const RGB &c, float spd) {
+// void CClyde::fadeAmbient(const RGB &c, float spd) {
+//   m_ambient.targetColor = c;
+  
+//   //calculate fade speed for each color
+//   m_ambient.fadeSpeed = RGBf(
+//     (m_ambient.targetColor.r - m_ambient.color.r) / 255.0f * spd,
+//     (m_ambient.targetColor.g - m_ambient.color.g) / 255.0f * spd,
+//     (m_ambient.targetColor.b - m_ambient.color.b) / 255.0f * spd
+//   );
+
+//   //make sure that fade speeds are positive
+//   if (m_ambient.fadeSpeed.r < 0) m_ambient.fadeSpeed.r *= -1;
+//   if (m_ambient.fadeSpeed.g < 0) m_ambient.fadeSpeed.g *= -1;
+//   if (m_ambient.fadeSpeed.b < 0) m_ambient.fadeSpeed.b *= -1;
+// }
+
+// the fadeAmbient version without floats.
+void CClyde::fadeAmbient(const RGB &c, uint8_t tm) {
   m_ambient.targetColor = c;
   
   //calculate fade speed for each color
   m_ambient.fadeSpeed = RGBf(
-    (m_ambient.targetColor.r - m_ambient.color.r) / 255.0f * spd,
-    (m_ambient.targetColor.g - m_ambient.color.g) / 255.0f * spd,
-    (m_ambient.targetColor.b - m_ambient.color.b) / 255.0f * spd
+    (m_ambient.targetColor.r - m_ambient.color.r) / 255 / tm,
+    (m_ambient.targetColor.g - m_ambient.color.g) / 255 / tm,
+    (m_ambient.targetColor.b - m_ambient.color.b) / 255 / tm
   );
 
   //make sure that fade speeds are positive
@@ -602,32 +632,48 @@ void CClyde::setWhite(uint8_t b) {
   showWhiteLight();
 }
 
-void CClyde::fadeWhite(uint8_t b, float spd) {
+// void CClyde::fadeWhite(uint8_t b, float spd) {
+//   m_white.targetBrightness = b;
+
+//   m_white.fadeSpeed = (m_white.targetBrightness - m_white.brightness) / 255.0 * spd;
+//   if (m_white.fadeSpeed < 0) m_white.fadeSpeed *= -1;
+// }
+
+// fadeWhite without a float...
+void CClyde::fadeWhite(uint8_t b, uint16_t tm) {
   m_white.targetBrightness = b;
 
-  m_white.fadeSpeed = (m_white.targetBrightness - m_white.brightness) / 255.0 * spd;
+  m_white.fadeSpeed = (m_white.targetBrightness - m_white.brightness) / 255 / tm;
   if (m_white.fadeSpeed < 0) m_white.fadeSpeed *= -1;
 }
 
 void CClyde::switchLights()
 { 
   if (!m_white.isOn() && m_ambient.isOn()) {
-    fadeWhite(0, 0.1f);
+    //    fadeWhite(0, 0.1f);
+    fadeWhite(0, 10);
   }
   else if (m_white.isOn() && m_ambient.isOn()) {
     // save the current ambient light before switching off.
     m_ambient.save();
-    fadeAmbient(RGB(0,0,0), 0.5f);
+    //fadeAmbient(RGB(0,0,0), 0.5f);
+    fadeAmbient(RGB(0,0,0), 2 );
   }
   else if (m_white.isOn() && !m_ambient.isOn()) {
-    fadeWhite(255, 0.3f);
+    //    fadeWhite(255, 0.3f);
+    fadeWhite(255, 3);
+#ifdef ENABLE_MOUTH
     setPlayMode(PLAYMODE_SINGLE);
     play(SND_OFF);
+#endif
   }
   else if (!m_white.isOn() && !m_ambient.isOn()) {
-    fadeAmbient(m_ambient.savedColor, 0.1f);
+    //fadeAmbient(m_ambient.savedColor, 0.1f);
+    fadeAmbient(m_ambient.savedColor, 10 );
+#ifdef ENABLE_MOUTH
     setPlayMode(PLAYMODE_SINGLE);
     play(SND_ON);
+#endif
   }
   
 #ifdef CLYDE_DEBUG
@@ -687,6 +733,7 @@ void CClyde::stopCycle() {  //TODO should this be a function pointer set when st
   }  
 }
 
+// just commented this out to save space...
 void CClyde::blink(const RGB& rgb, uint32_t onDuration, uint32_t offDuration, uint8_t numBlinks) {
   //calculate number of steps needed in the cycle
   uint8_t steps = numBlinks*2 + 1;
@@ -756,7 +803,9 @@ void CClyde::updateCycleNextStep(uint32_t now) {
     else {
       m_cycle.type = OFF;
       setAmbient(m_cycle.colors[m_cycle.numSteps-1]);
+#ifdef ENABLE_MOUTH
       stop();
+#endif
       return;
     }
   }

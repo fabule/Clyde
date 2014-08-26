@@ -22,6 +22,7 @@
 
 #define ENABLE_AFRAID_OF_THE_DARK
 #define ENABLE_TOUCHY_FEELY
+//#define ENABLE_MOUTH
 
 #include "colortypes.h"
 #include "ClydeEEPROM.h"
@@ -54,6 +55,7 @@ enum ECycleLoop {
   NO_LOOP
 };
 
+#ifdef ENABLE_MOUTH
 /**
  * Enum types for mp3 op codes.
  */
@@ -98,7 +100,7 @@ enum EAudioIndex {
   SND_AU_CLAIR_DE_LA_LUNE = 12,
   SND_DAISY_BELL = 13
 };
-
+#endif
 /**
  * Main Clyde class that provides the interface to the device.
  */
@@ -146,7 +148,7 @@ public:
   struct CWhiteLight {
     uint8_t pin;            /**< Digital pin to control the brightness. */
     float brightness;       /**< Current brightness. */
-    float targetBrightness; /**< Target brightness, used for fading. */
+    uint8_t targetBrightness; /**< Target brightness, used for fading. */
     float fadeSpeed;        /**< Speed, used for fading. */
     
     /**
@@ -220,7 +222,8 @@ public:
     /** Turn off the cycle. */
     void off() { type = OFF; }
   };
-  
+
+#ifdef ENABLE_MOUTH
   /**
    * The mouth / speaker / mp3 player
    */
@@ -238,6 +241,7 @@ public:
     
     static SoftwareSerial mp3;
   };
+#endif
     
 private:
   CModulePosition m_modules[CModulePosition::NUM_MODULES];
@@ -246,8 +250,9 @@ private:
   CClydeEEPROM m_eeprom;
   CEye m_eye;
   CAmbientCycle m_cycle;
+#ifdef ENABLE_MOUTH
   CMouth m_mouth;
-  
+#endif
 public:
   /** Contructor. */
   CClyde();
@@ -260,9 +265,11 @@ public:
 
   /** Update the eye / infrared switch. */
   void updateEye();
-  
+
+#ifdef ENABLE_MOUTH
   /** Update the mouth / sound shield. */
   void updateMouth();
+#endif
   
   /** Update the ambient light. */
   void updateAmbientLight();
@@ -293,11 +300,16 @@ public:
    */
   void setAmbient(const RGB &c);
   
+  /* /\** */
+  /*  * Fade the ambient color to a given color. */
+  /*  *\/ */
+  /* void fadeAmbient(const RGB &c, float spd); */
+
   /**
-   * Fade the ambient color to a given color.
+   * Fade the ambient color to a given color. Higher values of tm will cause slower fading
    */
-  void fadeAmbient(const RGB &c, float spd);
-    
+  void fadeAmbient(const RGB &c, uint8_t tm);
+
   /**
    * Get the white light object.
    */
@@ -309,9 +321,10 @@ public:
   void setWhite(uint8_t b);
   
   /**
-   * Fade the white light to a given brightness.
+   * Fade the white light to a given brightness. Slower fading for higher tm values
    */
-  void fadeWhite(uint8_t b, float spd);
+  //  void fadeWhite(uint8_t b, float spd);
+  void fadeWhite(uint8_t b, uint16_t tm);
 
   /** Switch to the next of the four lights on/off states. */
   void switchLights();
@@ -355,8 +368,9 @@ public:
   /**
    * Make the ambient light blink.
    */
-  void blink(const RGB& rgb, uint32_t onDuration, uint32_t offDuration, uint8_t numBlinks);
-  
+    void blink(const RGB& rgb, uint32_t onDuration, uint32_t offDuration, uint8_t numBlinks);
+
+#ifdef ENABLE_MOUTH
   /**
    * Set the loudmouth mp3 player play mode.
    */
@@ -387,6 +401,7 @@ public:
    * Stop the audio of the Loudmouth shield.
    */
   EOpCode stop(void);
+#endif
   
 private:
   /** Detect the personality modules. */

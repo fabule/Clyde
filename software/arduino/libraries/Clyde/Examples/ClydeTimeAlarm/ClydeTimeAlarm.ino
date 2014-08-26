@@ -15,17 +15,13 @@ void setup() {
   Wire.begin();
 
   Serial.begin(9600);
-  sCmd.addCommand("SERIAL", cmdSerial);
-  sCmd.addCommand("VERSION", cmdVersion);
-  sCmd.addCommand("RESET", cmdReset);
+  // Uncomment this line to talk to Clyde over the Serial Monitor
+  //while (!Serial) ;
   sCmd.addCommand("TIME", digitalClockDisplay);
-//  sCmd.addCommand("SET_AMBIENT", cmdSetAmbient);
-//  sCmd.addCommand("SET_WHITE", cmdSetWhite);
-//  sCmd.addCommand("WRITE_EEPROM", cmdWriteEEPROM);
-//  sCmd.addCommand("READ_EEPROM", cmdReadEEPROM);
 
   setTime(8,29,0,1,1,11);
-  Alarm.alarmRepeat(8,31,0, MorningAlarm);
+  Alarm.alarmRepeat(8,31,0, startSunrise);
+  Alarm.alarmRepeat(8,33,0, startSunriseWhiteLight);
   Clyde.eeprom()->reset();
   Clyde.begin();
 }
@@ -37,9 +33,10 @@ void loop() {
   //calibrate the eye and check for press
   Clyde.updateEye();
 
+#ifdef ENABLE_MOUTH
   //update the mouth to play sounds
   Clyde.updateMouth();
-
+#endif
   //update the lights
   Clyde.updateAmbientLight();
   Clyde.updateWhiteLight();
@@ -49,20 +46,20 @@ void loop() {
     Clyde.updatePersonalities();
 
   // check for alarm.
-  // Note: if this delay function causes any problems we make the serviceAlarms function
-  // public and directly call that here.
-  Alarm.delay( 5 );  // delay for 5ms.
+  // Note: the serviceAlarms function is private in the original TimeAlarms library and the
+  // only way to check for an alarm was the delay function.
+  Alarm.serviceAlarms();
+  //Alarm.delay( 1 );  // delay for 1ms and during that time period check for alarms.
 }
 
-void MorningAlarm(){
-  Serial.println("Alarm: - turn lights on!");
-  Clyde.setWhite(200);
+void startSunriseWhiteLight(){
+  Clyde.fadeWhite( 0, 1000 );
 }
 
 void startSunrise(){
   RGB sunriseColors[7] = {RGB(19, 17, 28), RGB(39, 34, 57), RGB(78, 69, 114), RGB(46, 108, 181), RGB(168, 142, 127), RGB(255, 166, 48), RGB(255, 210, 66) };
-  uint32_t suriseIntervals[7] = {30000, 60000, 60000, 60000, 60000, 60000, 60000}; //real
-  Clyde.setCycle( SUNRISE, 7, sunriseColors, sunriseIntervals )
+  uint32_t sunriseIntervals[7] = {30000, 60000, 60000, 60000, 60000, 60000, 60000}; //real
+  Clyde.setCycle( SUNRISE, 7, sunriseColors, sunriseIntervals, NO_LOOP );
 }
 
 void digitalClockDisplay()
@@ -82,84 +79,3 @@ void printDigits(int digits)
   Serial.print(digits);
 }
 
-//
-// Serial Commands
-//
-
-void cmdSerial() {
-  char serial[7] = {0};
-  Clyde.eeprom()->readSerial(&serial[0]);
-  Serial.print("OK ");
-  Serial.println(serial);
-}
-
-void cmdVersion() {
-  uint16_t vers = FIRMWARE_VERSION;
-  Serial.print("OK ");
-  Serial.println(vers);
-}
-
-void cmdReset() {
-  Clyde.eeprom()->reset();
-  Serial.println("OK");
-}
-
-/**
-void cmdSetAmbient() {
-  char *param1, *param2, *param3;
-  int r, g, b;
-
-  //Get arguments
-  param1 = sCmd.next();    // Red
-  param2 = sCmd.next();    // Green
-  param3 = sCmd.next();    // Blue
-  r = atoi(param1);
-  g = atoi(param2);
-  b = atoi(param3);
-
-  Clyde.setAmbient(RGB(r, g, b));
-  Serial.println("OK");
-}
-
-void cmdSetWhite() {
-  char *param1;
-  int w;
-
-  //Get arguments
-  param1 = sCmd.next();    // Brightness
-  w = atoi(param1);
-
-  if (w > 255) w = 255;
-  w = 255 - w;
-
-  Clyde.setWhite(w);
-  Serial.println("OK");
-}
-
-void cmdWriteEEPROM() {
-  char *param1, *param2;
-  int addr;
-  byte value;
-
-  //Get arguments
-  param1 = sCmd.next();    // Address
-  param2 = sCmd.next();    // Value
-  addr = atoi(param1);
-  value = atoi(param2);
-
-  EEPROM.write(addr, value);
-  Serial.println("OK");
-}
-
-void cmdReadEEPROM() {
-  char *param1;
-  int addr;
-
-  //Get arguments
-  param1 = sCmd.next();    // Address
-  addr = atoi(param1);
-
-  Serial.print("OK ");
-  Serial.println(EEPROM.read(addr));
-}
-*/

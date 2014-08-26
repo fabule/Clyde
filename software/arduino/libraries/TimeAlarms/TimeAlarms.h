@@ -55,7 +55,6 @@ class TimeAlarmsClass
 {
 private:
    AlarmClass Alarm[dtNBR_ALARMS];
-   void serviceAlarms();
    uint8_t isServicing;
    uint8_t servicedAlarmId; // the alarm currently being serviced
    AlarmID_t create( time_t value, OnTick_t onTickHandler, uint8_t isOneShot, dtAlarmPeriod_t alarmType, uint8_t isEnabled=true);
@@ -81,6 +80,8 @@ public:
   AlarmID_t timerRepeat(const int H,  const int M,  const int S, OnTick_t onTickHandler);   // As above with HMS arguments
   
   void delay(unsigned long ms);
+  // moved that from private methods.
+  void serviceAlarms();
    
   // utility methods
   uint8_t getDigitsNow( dtUnits_t Units);         // returns the current digit value for the given time unit

@@ -160,22 +160,22 @@ void CClydeTouchyFeely::tickleCheck() {
   if( !( Clyde.cycle()->is(LAUGH) | Clyde.cycle()->is(SUNSET) ) ){
     switch (m_lastStatus){
     case 1:
-      Clyde.fadeAmbient( COLOR_LEG_1, 0.5f );
+      Clyde.fadeAmbient( COLOR_LEG_1, 2 );
       break;
     case 2:
-      Clyde.fadeAmbient( COLOR_LEG_2, 0.5f );
+      Clyde.fadeAmbient( COLOR_LEG_2, 2 );
       break;
     case 4:
-      Clyde.fadeAmbient( COLOR_LEG_4, 0.5f );
+      Clyde.fadeAmbient( COLOR_LEG_4, 2 );
       break;
     case 8:
-      Clyde.fadeAmbient( COLOR_LEG_8, 0.5f );
+      Clyde.fadeAmbient( COLOR_LEG_8, 2 );
       break;
     case 16:
-      Clyde.fadeAmbient( COLOR_LEG_16, 0.5f );
+      Clyde.fadeAmbient( COLOR_LEG_16, 2 );
       break;
     case 32:
-      Clyde.fadeAmbient( COLOR_LEG_32, 0.5f );
+      Clyde.fadeAmbient( COLOR_LEG_32, 2 );
       break;
     }
   }
@@ -218,8 +218,10 @@ void CClydeTouchyFeely::laugh() {
   m_laughIntervals[laughSteps-1] = random(150, 200);
   
   Clyde.setCycle(LAUGH, laughSteps, &m_laughColors[0], m_laughIntervals, NO_LOOP);
+#ifdef ENABLE_MOUTH
   Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
   Clyde.play(SND_LAUGH);
+#endif
 }
 
 void CClydeTouchyFeely::startColorSelect() {
@@ -231,9 +233,10 @@ void CClydeTouchyFeely::startColorSelect() {
   
   Clyde.setCycle(SELECT, SELECT_STEPS, SELECT_COLORS, SELECT_INTERVALS, LOOP);
   Clyde.setCycleStep(m_lastStopStep);
-  
+#ifdef ENABLE_MOUTH  
   Clyde.setPlayMode(PLAYMODE_SINGLE_CYCLE);
   Clyde.play(SND_HAPPY);
+#endif
 }
 
 void CClydeTouchyFeely::stopColorSelect() {
@@ -248,9 +251,11 @@ void CClydeTouchyFeely::stopColorSelect() {
   
   Clyde.cycle()->off();
   Clyde.ambient()->save();
-  
+
+#ifdef ENABLE_MOUTH
   //stop audio
   Clyde.stop();
+#endif
 }
 
 /*
