@@ -80,14 +80,18 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   //only active when the ambient light is on
   if (!Clyde.ambient()->isOn()/* || Clyde.white()->isOn()*/) return;
 
+  //return if clyde is in any cycle other than SELECT or OFF.
+  // this avoids triggering an accidental color change by touching a leg.
+  if( !( Clyde.cycle()->is(SELECT) | Clyde.cycle()->is(OFF) ) ) return;
+  
   //trigger touch event after a few millis to protect from false positive
   if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 250)) {
     #ifdef CLYDE_DEBUG
     Serial.println("Clyde: Touchy-Feely triggered touch event.");
     #endif
       
-    //start color selection only if the current cycle isn't laugh or select
-    if (!Clyde.cycle()->is(SELECT) && !Clyde.cycle()->is(LAUGH) && !Clyde.cycle()->is(SUNSET))
+    //start color selection only if the current cycle isn't select
+    if (!Clyde.cycle()->is(SELECT) )
       startColorSelect();
     
     //call touched handler if any

@@ -27,7 +27,7 @@ If you want to make modifications to the bootloader, please refer to the informa
 Configurations
 --------------
 
-h3. Using `TimeAlarms` library to enable alarms
+### Using `TimeAlarms` library to enable alarms
 
 The `Time` and `TimeAlarms` libraries provide functionality to set/get the time on an arduino and enable repeated or single alarms. An example configuration to use Clyde as an *alarm clock* is given in `/software/arduino/libraries/Clyde/Examples/ClydeTimeAlarm.ino`. This firmware can be uploaded instead of the `ClydeOriginal` firmware above by loading it under "File > Examples > Clyde > ClideTimeAlarms" and following the steps described above to compile and upload the firmware. The essential configuration steps for this alternative firmware are to set the time and to define an alarm. Without any additional hardware, the time has to be set manually in and the firmware has to be uploaded to Clyde each time Clyde is detached from the power source. In principle, the `Time` and `TimeAlarms` would allow to synchronize the arduino time e.g. with internet time over a Wifi shield.
 

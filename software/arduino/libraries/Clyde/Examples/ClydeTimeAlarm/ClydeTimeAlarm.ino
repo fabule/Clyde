@@ -7,6 +7,11 @@
 #include <Time.h>
 #include <TimeAlarms.h>
 
+/**
+  This is an alternative firmware that enables an alarm that will cause Clyde to
+  switch on the light at the specified time.
+ */
+
 #define FIRMWARE_VERSION 1
 
 SerialCommand sCmd;
@@ -19,6 +24,7 @@ void setup() {
   //while (!Serial) ;
   sCmd.addCommand("TIME", digitalClockDisplay);
 
+  // set the time below to the current time.
   setTime(8,29,0,1,1,11);
   Alarm.alarmRepeat(8,31,0, startSunrise);
   Alarm.alarmRepeat(8,33,0, startSunriseWhiteLight);
