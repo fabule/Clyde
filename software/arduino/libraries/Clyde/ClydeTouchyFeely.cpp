@@ -82,7 +82,7 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
 
   //return if clyde is in any cycle other than SELECT or OFF.
   // this avoids triggering an accidental color change by touching a leg.
-  if( !( Clyde.cycle()->is(SELECT) | Clyde.cycle()->is(OFF) ) ) return;
+  if( !( Clyde.cycle()->is(SELECT) | Clyde.cycle()->is(OFF) | Clyde.cycle()->is(UNKNOWN) ) ) return;
   
   //trigger touch event after a few millis to protect from false positive
   if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 250)) {
