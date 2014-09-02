@@ -648,34 +648,37 @@ void CClyde::fadeWhite(uint8_t b, uint16_t tm) {
 }
 
 void CClyde::switchLights()
-{ 
-  if (!m_white.isOn() && m_ambient.isOn()) {
-    //    fadeWhite(0, 0.1f);
-    fadeWhite(0, 10);
-  }
-  else if (m_white.isOn() && m_ambient.isOn()) {
-    // save the current ambient light before switching off.
-    m_ambient.save();
-    //fadeAmbient(RGB(0,0,0), 0.5f);
-    fadeAmbient(RGB(0,0,0), 2 );
-  }
-  else if (m_white.isOn() && !m_ambient.isOn()) {
-    //    fadeWhite(255, 0.3f);
-    fadeWhite(255, 3);
-#ifdef ENABLE_MOUTH
-    setPlayMode(PLAYMODE_SINGLE);
-    play(SND_OFF);
-#endif
-  }
-  else if (!m_white.isOn() && !m_ambient.isOn()) {
-    //fadeAmbient(m_ambient.savedColor, 0.1f);
-    fadeAmbient(m_ambient.savedColor, 10 );
-#ifdef ENABLE_MOUTH
-    setPlayMode(PLAYMODE_SINGLE);
-    play(SND_ON);
-#endif
-  }
+{
+  // just making sure to switch off any cycle...
+  m_cycle.off();  
   
+  if( m_white.isOn() ){
+    if( m_ambient.isOn() ){
+      // save the current ambient light before switching off.
+      m_ambient.save();
+      //fadeAmbient(RGB(0,0,0), 0.5f);
+      fadeAmbient(RGB(0,0,0), 2 );
+    }else{
+      //    fadeWhite(255, 0.3f);
+      fadeWhite(255, 3);
+#ifdef ENABLE_MOUTH
+      setPlayMode(PLAYMODE_SINGLE);
+      play(SND_OFF);
+#endif
+    }
+  }else{
+    if( m_ambient.isOn() ){
+      //    fadeWhite(0, 0.1f);
+      fadeWhite(0, 10);
+    }else{
+      //fadeAmbient(m_ambient.savedColor, 0.1f);
+      fadeAmbient(m_ambient.savedColor, 10 );
+#ifdef ENABLE_MOUTH
+      setPlayMode(PLAYMODE_SINGLE);
+      play(SND_ON);
+#endif
+    }
+  }  
 #ifdef CLYDE_DEBUG
   Serial.print("Switched lights: white is ");
   Serial.print(m_white.isOn() ? "ON" : "OFF");

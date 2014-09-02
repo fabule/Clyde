@@ -146,6 +146,7 @@ void CClydeTouchyFeely::tickleCheck() {
     if (m_tickleCount >= TICKLE_REPEAT) {
       laugh();
       m_firstTickle = 0;
+      m_tickleCount = 0;
     }
     #ifdef CLYDE_DEBUG
     else {
@@ -161,7 +162,7 @@ void CClydeTouchyFeely::tickleCheck() {
     m_tickleCount = 0;
   }
   // if Clyde is not laughing, we change the color based on the touched leg.
-  if( !( Clyde.cycle()->is(LAUGH) | Clyde.cycle()->is(SUNSET) ) ){
+  if( !( Clyde.cycle()->is(LAUGH) ) ){
     switch (m_lastStatus){
     case 1:
       Clyde.fadeAmbient( COLOR_LEG_1, 2 );

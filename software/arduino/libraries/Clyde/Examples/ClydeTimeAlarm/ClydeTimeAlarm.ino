@@ -24,10 +24,12 @@ void setup() {
   //while (!Serial) ;
   sCmd.addCommand("TIME", digitalClockDisplay);
 
-  // set the time below to the current time.
-  setTime(8,29,0,1,1,11);
-  Alarm.alarmRepeat(8,31,0, startSunrise);
-  Alarm.alarmRepeat(8,33,0, startSunriseWhiteLight);
+  // set the time below to the current time when compiling and uploading
+  setTime(20,15,0,2,9,14);
+  
+  // example alarms.
+  Alarm.alarmRepeat(6,15,0, startSunrise);
+  Alarm.alarmRepeat(6,18,0, startSunriseWhiteLight);
   Clyde.eeprom()->reset();
   Clyde.begin();
 }
