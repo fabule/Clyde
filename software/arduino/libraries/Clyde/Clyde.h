@@ -23,6 +23,7 @@
 #define ENABLE_AFRAID_OF_THE_DARK
 #define ENABLE_TOUCHY_FEELY
 //#define ENABLE_MOUTH
+//#define ENABLE_EYE   // enable/disable the eye... can be buggy on some devices. Note: if not ENABLE_EYE then we have to rely on the touchyfeely module!
 
 #include "colortypes.h"
 #include "ClydeEEPROM.h"
@@ -156,7 +157,8 @@ public:
      */
     bool isOn() { return targetBrightness < 255; }
   };
-  
+
+#ifdef ENABLE_EYE
   /**
    * The squishy eye.
    */
@@ -193,6 +195,7 @@ public:
       uint16_t restartCount;  /**< Number of time calibration restarted because of noise since last calibration. */
     #endif    
   };
+#endif
   
   /**
    * The ambient light cycle.
@@ -248,7 +251,9 @@ private:
   CAmbientLight m_ambient;
   CWhiteLight m_white;
   CClydeEEPROM m_eeprom;
+#ifdef ENABLE_EYE
   CEye m_eye;
+#endif
   CAmbientCycle m_cycle;
 #ifdef ENABLE_MOUTH
   CMouth m_mouth;
@@ -259,13 +264,15 @@ public:
   
   /** Initialize Clyde. */
   void begin();
-  
+
+#ifdef ENABLE_EYE
   /** Check if eye was calibrated once. */
   bool wasEyeCalibratedOnce() { return m_eye.onceCalibrated; }
 
   /** Update the eye / infrared switch. */
   void updateEye();
 
+#endif
 #ifdef ENABLE_MOUTH
   /** Update the mouth / sound shield. */
   void updateMouth();
@@ -409,7 +416,8 @@ private:
 
   /** Detect the loudmouth shield. */
   void detectMouth();
-  
+
+#ifdef ENABLE_EYE
   /**
    * Calibrate the eye.
    */
@@ -419,6 +427,7 @@ private:
    * Check if the eye was pressed given a read sensor value.
    */
   bool wasEyePressed(uint16_t irValue);
+#endif
   
   /** Update a color channel of the ambient light. */
   void updateAmbientLight(float *value, uint8_t target, float speed);

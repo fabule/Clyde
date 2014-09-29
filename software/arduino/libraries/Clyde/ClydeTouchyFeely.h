@@ -52,6 +52,9 @@ class CClydeTouchyFeely : public CClydeModule {
   RGB COLOR_LEG_8;
   RGB COLOR_LEG_16;
   RGB COLOR_LEG_32;
+#ifndef ENABLE_EYE
+  uint8_t LEG_SWITCH;
+#endif
   
   MPR121 m_mpr121;           /**< interface to the mpr121 */
   bool m_colorSelectEnabled; /**< color selection enabled flag */

@@ -33,19 +33,25 @@ void loop() {
   //read the serial communication if any
   sCmd.readSerial();
 
+#ifdef ENABLE_EYE
   //calibrate the eye and check for press
   Clyde.updateEye();
-
+#endif
+#ifdef ENABLE_MOUTH
   //update the mouth to play sounds
   Clyde.updateMouth();
-
+#endif
   //update the lights
   Clyde.updateAmbientLight();
   Clyde.updateWhiteLight();
-
+#ifdef ENABLE_EYE
   //make Clyde behave after the eye was calibrated once
   if (Clyde.wasEyeCalibratedOnce())
     Clyde.updatePersonalities();
+#else
+    Clyde.updatePersonalities();
+#endif
+
 }
 
 //

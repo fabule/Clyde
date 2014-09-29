@@ -65,7 +65,8 @@ CClyde::CClyde() {
   //TODO look for a better solution
   m_white.pin = 11;
   setWhite(254);
-  
+
+#ifdef ENABLE_EYE
   //init eye
   m_eye.pin = 0;
   m_eye.onceCalibrated = false;
@@ -86,7 +87,7 @@ CClyde::CClyde() {
 #ifdef CLYDE_DEBUG
   m_eye.restartCount = 0;
 #endif
-  
+#endif
   //init ambient cycle
   m_cycle.type = OFF;
   m_cycle.numSteps = 0;
@@ -225,6 +226,7 @@ void CClyde::detectMouth() {
 #endif
 }
 
+#ifdef ENABLE_EYE
 void CClyde::updateEye() {
   //read IR value
   uint16_t irValue = analogRead(m_eye.pin);
@@ -412,6 +414,8 @@ bool CClyde::wasEyePressed(uint16_t irValue) {
 
   return false;
 }
+#endif  // the endif for #ifdef ENABLE_EYE
+
 
 #ifdef ENABLE_MOUTH
 void CClyde::updateMouth() {
