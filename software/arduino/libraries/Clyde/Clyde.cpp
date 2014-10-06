@@ -653,6 +653,9 @@ void CClyde::fadeWhite(uint8_t b, uint16_t tm) {
 
 void CClyde::switchLights()
 {
+#ifdef CLYDE_DEBUG
+  Serial.println( "Clyde: switchLights" );
+#endif
   // just making sure to switch off any cycle...
   m_cycle.off();  
   

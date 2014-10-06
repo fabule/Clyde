@@ -45,7 +45,7 @@ CClydeTouchyFeely::CClydeTouchyFeely()
   COLOR_LEG_16 = RGB( 255, 127,   0 ); // orange
   COLOR_LEG_32 = RGB( 240,   2, 127 ); // pink
 #ifndef ENABLE_EYE
-  LEG_SWITCH = 8;  // which leg should be used as the light switch, if we're not using the eye?
+  LEG_SWITCH = 4;  // which leg should be used as the light switch, if we're not using the eye?
 #endif
 }
 
@@ -80,17 +80,18 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
     m_lastWhiteOn = Clyde.white()->isOn();
   }
 
-#ifndef ENABLE_EYE  // if we use a leg as a switch we cannot return here!
+
+// if we use a leg as a switch we cannot return here!
+#ifdef ENABLE_EYE
   //only active when the ambient light is on
   if (!Clyde.ambient()->isOn()/* || Clyde.white()->isOn()*/) return;
-
   //return if clyde is in any cycle other than SELECT or OFF.
   // this avoids triggering an accidental color change by touching a leg.
   if( !( Clyde.cycle()->is(SELECT) | Clyde.cycle()->is(OFF) | Clyde.cycle()->is(UNKNOWN) ) ) return;
 #endif
   
   //trigger touch event after a few millis to protect from false positive
-  if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 250)) {
+  if ((m_touchStatus & 0x0FFF) && (millis()-m_touchStart > 500)) {
     #ifdef CLYDE_DEBUG
     Serial.println("Clyde: Touchy-Feely triggered touch event.");
     #endif
@@ -116,7 +117,7 @@ void CClydeTouchyFeely::update(uint8_t apin, uint8_t dpin) {
   //keep track of when touch started
   if (m_touchStatus & 0x0FFF) {
     #ifdef CLYDE_DEBUG
-    Serial.println("Clyde: Touchy-Feely detected a touch.");
+    Serial.println("Clyde: Touchy-Feely detected a touch (not triggering the color select).");
     #endif
     m_lastStatus = m_touchStatus;
     m_touchStart = millis();
@@ -145,6 +146,7 @@ void CClydeTouchyFeely::tickleCheck() {
 #ifndef ENABLE_EYE
   if( m_lastStatus==LEG_SWITCH ){
     Clyde.switchLights();
+    return;
   }
 #endif
   //touch detected, increase the tickle count

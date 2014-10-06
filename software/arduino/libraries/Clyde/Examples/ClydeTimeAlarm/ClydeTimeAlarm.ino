@@ -23,7 +23,7 @@ void setup() {
   // Uncomment this line to talk to Clyde over the Serial Monitor
   //while (!Serial) ;
   sCmd.addCommand("TIME", digitalClockDisplay);
-
+  sCmd.addCommand("LIGHT", switchLights);
   // set the time below to the current time when compiling and uploading
   setTime(20,15,0,2,9,14);
   
@@ -47,17 +47,18 @@ void loop() {
   //update the mouth to play sounds
   Clyde.updateMouth();
 #endif
+  Clyde.updatePersonalities();
   //update the lights
   Clyde.updateAmbientLight();
   Clyde.updateWhiteLight();
 
-#ifdef ENABLE_EYE
-  //make Clyde behave after the eye was calibrated once
-  if (Clyde.wasEyeCalibratedOnce())
-    Clyde.updatePersonalities();
-#else
-  Clyde.updatePersonalities();
-#endif
+//#ifdef ENABLE_EYE
+//  //make Clyde behave after the eye was calibrated once
+//  if (Clyde.wasEyeCalibratedOnce())
+//    Clyde.updatePersonalities();
+//#else
+//  Clyde.updatePersonalities();
+//#endif
   
   // check for alarm.
   // Note: the serviceAlarms function is private in the original TimeAlarms library and the
@@ -74,6 +75,10 @@ void startSunrise(){
   RGB sunriseColors[7] = {RGB(19, 17, 28), RGB(39, 34, 57), RGB(78, 69, 114), RGB(46, 108, 181), RGB(168, 142, 127), RGB(255, 166, 48), RGB(255, 210, 66) };
   uint32_t sunriseIntervals[7] = {30000, 60000, 60000, 60000, 60000, 60000, 60000}; //real
   Clyde.setCycle( SUNRISE, 7, sunriseColors, sunriseIntervals, NO_LOOP );
+}
+
+void switchLights(){
+  Clyde.switchLights();
 }
 
 void digitalClockDisplay()
