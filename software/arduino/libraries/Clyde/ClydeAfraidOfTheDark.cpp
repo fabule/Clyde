@@ -104,8 +104,10 @@ void CClydeAfraidOfTheDark::startSunset() {
     return;
   
   Clyde.setCycle(SUNSET, m_sunsetSteps, m_sunsetColors, m_sunsetIntervals, NO_LOOP);
+#ifdef ENABLE_MOUTH
   Clyde.setPlayMode(PLAYMODE_SINGLE);
   Clyde.play(SND_AU_CLAIR_DE_LA_LUNE);
+#endif
 }
 
 #endif

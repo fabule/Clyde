@@ -22,6 +22,8 @@
 
 #define ENABLE_AFRAID_OF_THE_DARK
 #define ENABLE_TOUCHY_FEELY
+//#define ENABLE_MOUTH
+//#define ENABLE_EYE   // enable/disable the eye... can be buggy on some devices. Note: if not ENABLE_EYE then we have to rely on the touchyfeely module!
 
 #include "colortypes.h"
 #include "ClydeEEPROM.h"
@@ -39,6 +41,7 @@ enum ECycleType {
 	OFF,
 	BLINK,
 	SUNSET,
+	SUNRISE,
   SELECT,
   LAUGH,
   UNKNOWN
@@ -53,6 +56,7 @@ enum ECycleLoop {
   NO_LOOP
 };
 
+#ifdef ENABLE_MOUTH
 /**
  * Enum types for mp3 op codes.
  */
@@ -97,7 +101,7 @@ enum EAudioIndex {
   SND_AU_CLAIR_DE_LA_LUNE = 12,
   SND_DAISY_BELL = 13
 };
-
+#endif
 /**
  * Main Clyde class that provides the interface to the device.
  */
@@ -145,7 +149,7 @@ public:
   struct CWhiteLight {
     uint8_t pin;            /**< Digital pin to control the brightness. */
     float brightness;       /**< Current brightness. */
-    float targetBrightness; /**< Target brightness, used for fading. */
+    uint8_t targetBrightness; /**< Target brightness, used for fading. */
     float fadeSpeed;        /**< Speed, used for fading. */
     
     /**
@@ -153,7 +157,8 @@ public:
      */
     bool isOn() { return targetBrightness < 255; }
   };
-  
+
+#ifdef ENABLE_EYE
   /**
    * The squishy eye.
    */
@@ -190,6 +195,7 @@ public:
       uint16_t restartCount;  /**< Number of time calibration restarted because of noise since last calibration. */
     #endif    
   };
+#endif
   
   /**
    * The ambient light cycle.
@@ -219,7 +225,8 @@ public:
     /** Turn off the cycle. */
     void off() { type = OFF; }
   };
-  
+
+#ifdef ENABLE_MOUTH
   /**
    * The mouth / speaker / mp3 player
    */
@@ -237,31 +244,39 @@ public:
     
     static SoftwareSerial mp3;
   };
+#endif
     
 private:
   CModulePosition m_modules[CModulePosition::NUM_MODULES];
   CAmbientLight m_ambient;
   CWhiteLight m_white;
   CClydeEEPROM m_eeprom;
+#ifdef ENABLE_EYE
   CEye m_eye;
+#endif
   CAmbientCycle m_cycle;
+#ifdef ENABLE_MOUTH
   CMouth m_mouth;
-  
+#endif
 public:
   /** Contructor. */
   CClyde();
   
   /** Initialize Clyde. */
   void begin();
-  
+
+#ifdef ENABLE_EYE
   /** Check if eye was calibrated once. */
   bool wasEyeCalibratedOnce() { return m_eye.onceCalibrated; }
 
   /** Update the eye / infrared switch. */
   void updateEye();
-  
+
+#endif
+#ifdef ENABLE_MOUTH
   /** Update the mouth / sound shield. */
   void updateMouth();
+#endif
   
   /** Update the ambient light. */
   void updateAmbientLight();
@@ -292,11 +307,16 @@ public:
    */
   void setAmbient(const RGB &c);
   
+  /* /\** */
+  /*  * Fade the ambient color to a given color. */
+  /*  *\/ */
+  /* void fadeAmbient(const RGB &c, float spd); */
+
   /**
-   * Fade the ambient color to a given color.
+   * Fade the ambient color to a given color. Higher values of tm will cause slower fading
    */
-  void fadeAmbient(const RGB &c, float spd);
-    
+  void fadeAmbient(const RGB &c, uint8_t tm);
+
   /**
    * Get the white light object.
    */
@@ -308,9 +328,10 @@ public:
   void setWhite(uint8_t b);
   
   /**
-   * Fade the white light to a given brightness.
+   * Fade the white light to a given brightness. Slower fading for higher tm values
    */
-  void fadeWhite(uint8_t b, float spd);
+  //  void fadeWhite(uint8_t b, float spd);
+  void fadeWhite(uint8_t b, uint16_t tm);
 
   /** Switch to the next of the four lights on/off states. */
   void switchLights();
@@ -354,8 +375,9 @@ public:
   /**
    * Make the ambient light blink.
    */
-  void blink(const RGB& rgb, uint32_t onDuration, uint32_t offDuration, uint8_t numBlinks);
-  
+    void blink(const RGB& rgb, uint32_t onDuration, uint32_t offDuration, uint8_t numBlinks);
+
+#ifdef ENABLE_MOUTH
   /**
    * Set the loudmouth mp3 player play mode.
    */
@@ -386,6 +408,7 @@ public:
    * Stop the audio of the Loudmouth shield.
    */
   EOpCode stop(void);
+#endif
   
 private:
   /** Detect the personality modules. */
@@ -393,7 +416,8 @@ private:
 
   /** Detect the loudmouth shield. */
   void detectMouth();
-  
+
+#ifdef ENABLE_EYE
   /**
    * Calibrate the eye.
    */
@@ -403,6 +427,7 @@ private:
    * Check if the eye was pressed given a read sensor value.
    */
   bool wasEyePressed(uint16_t irValue);
+#endif
   
   /** Update a color channel of the ambient light. */
   void updateAmbientLight(float *value, uint8_t target, float speed);

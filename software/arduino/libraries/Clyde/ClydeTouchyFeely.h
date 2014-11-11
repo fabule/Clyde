@@ -44,6 +44,17 @@ class CClydeTouchyFeely : public CClydeModule {
   static const RGB SELECT_COLORS[];               /**< colors of the color select cycle */
   static const uint16_t SELECT_INTERVALS[];       /**< intervals of the color select cycle */
   static const uint8_t SELECT_STEPS;              /**< steps in the color select cycle */
+
+  /* leg colors*/
+  RGB COLOR_LEG_1;
+  RGB COLOR_LEG_2;
+  RGB COLOR_LEG_4;
+  RGB COLOR_LEG_8;
+  RGB COLOR_LEG_16;
+  RGB COLOR_LEG_32;
+#ifndef ENABLE_EYE
+  uint8_t LEG_SWITCH;
+#endif
   
   MPR121 m_mpr121;           /**< interface to the mpr121 */
   bool m_colorSelectEnabled; /**< color selection enabled flag */
@@ -51,6 +62,7 @@ class CClydeTouchyFeely : public CClydeModule {
   uint32_t m_firstTickle;    /**< time in millis we detected the first tickle tap */
   uint8_t m_lastStopStep;    /**< step index when the color select cycle was stopped. */
   uint16_t m_touchStatus;    /**< current status of touch electrodes. */
+  uint16_t m_lastStatus;     /**< last status of touch electrodes. */
   uint32_t m_touchStart;     /**< time in millis when the active touch started. */
   bool m_lastAmbientOn;      /**< status of the ambient light on last update. */
   bool m_lastWhiteOn;        /**< status of the white light on last update. */

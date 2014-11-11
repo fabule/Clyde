@@ -24,6 +24,17 @@ At this point, you should be ready to compile and upload Clyde's firmware. Conne
 
 If you want to make modifications to the bootloader, please refer to the information found here: https://github.com/fabule/Clyde/tree/master/software/arduino/bootloaders/caterina
 
+Configurations
+--------------
+
+### Using `TimeAlarms` library to enable alarms
+
+The `Time` and `TimeAlarms` libraries provide functionality to set/get the time on an arduino and enable repeated or single alarms. An example configuration to use Clyde as an *alarm clock* is given in `/software/arduino/libraries/Clyde/Examples/ClydeTimeAlarm.ino`. This firmware can be uploaded instead of the `ClydeOriginal` firmware above by loading it under "File > Examples > Clyde > ClideTimeAlarms" and following the steps described above to compile and upload the firmware. The essential configuration steps for this alternative firmware are to set the time and to define an alarm. Without any additional hardware, the time has to be set manually in and the firmware has to be uploaded to Clyde each time Clyde is detached from the power source. In principle, the `Time` and `TimeAlarms` would allow to synchronize the arduino time e.g. with internet time over a Wifi shield.
+
+### Using Clyde without the eye
+
+The eye of some Clydes can become quite buggy after some time. Thus, the preprocessor variable `ENABLE_EYE` has been included, that, if not defined allows to switch the lights by touching one of the legs of Clyde (requires the TouchyFeely module). The `ENABLE_EYE` can be set in the `Clyde.h` file, the leg that is to be used as a switch can be defined with the `LEG_SWITCH` variable in `ClydeTouchyFeely.cpp`.
+
 Credits
 -------
 Clyde is an open source project manage by Fabule Fabrications in Montréal, Québec, Canada.
